@@ -21,6 +21,12 @@ namespace Evidencia
 		public List<User> zaznamyUser;
 		public List<Namespace> zaznamyNamespace;
 
+
+		/// <summary>
+		/// Funkcia UPDATE, ktorá slúži na vloženie údajov z Listu DataTableRecords do lokálnej databázy Majetok.db, tabuľky Records v SQLite formáte databázy, pred vložením údajov sa vymaže obsah danej tabuľky.
+		/// </summary>
+		/// <param name="udaje">premmenná, ktorá vyťahuje údaje z listu DataTableRecords</param>
+		/// <returns></returns>
 		public int ListRecordToSqlite(List<DataTableRecords> udaje)
 		{
 			string truncateTable = "DELETE FROM kteem_record";
@@ -83,6 +89,11 @@ namespace Evidencia
 			return 0;
 
 		}
+		/// <summary>
+		/// funkcia, ktorá prečíta obsah lokálnej databázy Majetok.db, v tabuľke kteem_record v SQLite formáte, následne tento obsah vloží do Listu s názvom Record
+		/// </summary>
+		/// <param name="ev"></param>
+
 		public void SqliteRecordToList(Evidencia ev)
 		{
 			zaznamyRecord = new List<Record>();
@@ -154,6 +165,12 @@ namespace Evidencia
 			}
 		}
 
+		/// <summary>
+		/// Funkcia UPDATE, ktorá slúži na vloženie údajov z Listu DataTableUsers do lokálnej databázy Majetok.db, tabuľky Users v SQLite formáte databázy, pred vložením údajov sa vymaže obsah danej tabuľky.
+		/// </summary>
+		/// <param name="udaje">premmenná, ktorá vyťahuje údaje z listu DataTableUsers</param>
+		/// <returns></returns>
+		/// 
 		public int ListUsersToSqlite(List<DataTableUsers> udaje)
 		{
 			string truncateTable = "DELETE FROM kteem_users";
@@ -188,6 +205,11 @@ namespace Evidencia
 			return 0;
 
 		}
+		/// <summary>
+		/// funkcia, ktorá prečíta obsah lokálnej databázy Majetok.db, v tabuľke kteem_users v SQLite formáte, následne tento obsah vloží do Listu s názvom Record
+		/// </summary>
+		/// <param name="ev"></param>
+
 		public void SqliteUserToList(Evidencia ev)
 		{
 			zaznamyUser = new List<User>();
@@ -228,6 +250,13 @@ namespace Evidencia
 			}
 		}
 
+		/// <summary>
+		/// Funkcia UPDATE, ktorá slúži na vloženie údajov z Listu DataTableNamespace do lokálnej databázy Majetok.db, tabuľky Users v SQLite formáte databázy, pred vložením údajov sa vymaže obsah danej tabuľky.
+		/// </summary>
+		/// <param name="udaje">premmenná, ktorá vyťahuje údaje z listu DataTableNamespace</param>
+		/// <returns></returns>
+	
+
 		public int ListNamespaceToSqlite(List<DataTableNamespace> udaje)
 		{
 			string truncateTable = "DELETE FROM kteem_namespace";
@@ -262,6 +291,12 @@ namespace Evidencia
 			return 0;
 
 		}
+
+		/// <summary>
+		/// funkcia, ktorá prečíta obsah lokálnej databázy Majetok.db, v tabuľke kteem_namespace v SQLite formáte, následne tento obsah vloží do Listu s názvom Record
+		/// </summary>
+		/// <param name="ev"></param>
+
 		public void SqliteNamespaceToList(Evidencia ev)
 		{
 			zaznamyNamespace = new List<Namespace>();

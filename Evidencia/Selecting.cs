@@ -34,7 +34,7 @@ namespace Evidencia
 				ev.cmbRoom.Items.AddRange(miestnosti.ToArray());
 				ev.cmbRoom.Items.Add(miestnostiAll);
 
-				List<string> skrine = ev.localDb.zaznamyRecord.Select(x => x.place_locker).Distinct().ToList();
+				List<string> skrine = ev.localDb.zaznamyRecord.Select(x => x.place_locker).Distinct().ToList() ;
 				skrine.Sort();
 				ev.cmbLocker.Items.AddRange(skrine.ToArray());
 				ev.cmbLocker.Items.Add(skrineAll);
@@ -61,38 +61,50 @@ namespace Evidencia
 				MessageBox.Show(exc.Message);
 			}
 		}
+
+		public void ShowAllTableRecords(Evidencia ev)
+		{
+			AllRoom = ev.localDb.zaznamyRecord;
+
+			foreach (var item in AllRoom)
+			{
+				ev.listBox.DataSource = AllRoom;
+			}
+		}
+
+
 		public void showRooms(Evidencia ev)
 		{
 			try
 			{
-				string roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
-				
-				SelectRoom = ev.localDb.zaznamyRecord.Where(x =>
-					(x.place_room_sap == roomSap)).ToList();
-				AllRoom = ev.localDb.zaznamyRecord;
+				ev.cmbLocker.Enabled = false;
+				ev.cmbShelve.Enabled = false;
 
+				string roomSap;
 
-				if ((SelectRoom?.Count ?? 0) == 0)
-				{
-					ev.listBox.DataSource = null;
-					MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
-				}
-				if (ev.cmbRoom.Text == miestnostiAll)
+				if (ev.cmbRoom.Text != miestnostiAll)
 				{
 
-					foreach (var item in AllRoom)
+
+					roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
+					SelectRoom = ev.localDb.zaznamyRecord.Where(x =>
+						(x.place_room_sap == roomSap)).ToList();
+						ev.cmbLocker.Enabled = true;
+
+					if ((SelectRoom?.Count ?? 0) == 0)
 					{
-						ev.listBox.DataSource = AllRoom;
+						ev.listBox.DataSource = null;
+						
+						MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
+						ev.cmbLocker.Enabled = false;
+						ev.cmbShelve.Enabled = false;
 					}
 				}
 				else
 				{
-					foreach (var item in SelectRoom)
-					{
-						ev.listBox.DataSource = SelectRoom;
-					}
-					ev.cmbLocker.Enabled = true;
+					SelectRoom = ev.localDb.zaznamyRecord;
 				}
+				ev.listBox.DataSource = SelectRoom;
 
 			}
 			catch (Exception exc)
@@ -112,21 +124,21 @@ namespace Evidencia
 				{
 					MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
 				}
-				if (ev.cmbLocker.Text == skrineAll)
+				if (ev.cmbRoom.SelectedText.Length == miestnostiAll.Length)
 				{
-
 					foreach (var item in AllLocker)
 					{
 						ev.listBox.DataSource = AllLocker;
 					}
+
 				}
 				else
 				{
 					foreach (var item in SelectLocker)
 					{
 						ev.listBox.DataSource = SelectLocker;
+						ev.cmbShelve.Enabled = true;	
 					}
-					ev.cmbShelve.Enabled = true;
 				}
 
 

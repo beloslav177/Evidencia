@@ -13,13 +13,16 @@ namespace Evidencia
 		private List<DataTableRecords> data_source_records = null;
 		private List<DataTableUsers> data_source_users = null;
 		private List<DataTableNamespace> data_source_namespace = null;
-		
 
-		public void ShowServerRecords(Evidencia ev)
+		/// <summary>
+		/// Funkcia, ktorá obsahuje funckiu LoadDataRecords a následne tieto údaje vypíše
+		/// </summary>
+		/// <param name="ev">Pointer na hlavnu triedu s názvom Evidencia</param>
+		public void LoadDataRecords(Evidencia ev)
 		{
 			try
 			{
-				MySqlToListRecords(ev);
+				LoadDataToListRecords(ev);
 				ev.TxtOut.Text = string.Empty;
 				foreach (DataTableRecords du in data_source_records)
 				{
@@ -34,7 +37,12 @@ namespace Evidencia
 				MessageBox.Show(ex.Message);
 			}
 		}
-		public void MySqlToListRecords(Evidencia ev)
+		/// <summary>
+		/// Pripojenie app k phpmyadmin localhost stránke PHP, v ktorej stiahne celý obsah stránky do stringu, pomocou knižnice
+		/// JSONConvert odparsuje TEXT a zapíše ho do listu s názvom DataTableRecords
+		/// </summary>
+		/// <param name="ev">Pointer na hlavnu triedu s názvom Evidencia</param>
+		public void LoadDataToListRecords(Evidencia ev)
 		{
 			try
 			{
@@ -63,11 +71,17 @@ namespace Evidencia
 		}
 		//*************************************************************************************************
 
-		public void ShowServerUsers(Evidencia ev)
+
+		/// <summary>
+		/// Funkcia, ktorá obsahuje funckiu LoadDataUsers a následne tieto údaje vypíše
+		/// </summary>
+		/// <param name="ev">Pointer na hlavnu triedu s názvom Evidencia</param>
+		
+		public void LoadDataUsers(Evidencia ev)
 		{
 			try
 			{
-				MySqlToListUsers(ev);
+				LoadDataToListUsers(ev);
 				ev.TxtOut.Text = string.Empty;
 				foreach (DataTableUsers du in data_source_users)
 				{
@@ -82,7 +96,12 @@ namespace Evidencia
 				MessageBox.Show(ex.Message);
 			}
 		}
-		public void MySqlToListUsers(Evidencia ev)
+		/// <summary>
+		/// Pripojenie app k phpmyadmin localhost stránke PHP, v ktorej stiahne celý obsah stránky do stringu, pomocou knižnice
+		/// JSONConvert odparsuje TEXT a zapíše ho do listu s názvom DataTableUsers
+		/// </summary>
+		/// <param name="ev"></param>
+		public void LoadDataToListUsers(Evidencia ev)
 		{
 			try
 			{
@@ -110,12 +129,16 @@ namespace Evidencia
 
 		//*************************************************************************************************
 
-		
-		public void ShowServerNamespace(Evidencia ev)
+		/// <summary>
+		/// Funkcia, ktorá obsahuje funckiu LoadDataNamespace a následne tieto údaje vypíše
+		/// </summary>
+		/// <param name="ev">Pointer na hlavnu triedu s názvom Evidencia</param>
+
+		public void LoadDataNamespace(Evidencia ev)
 		{
 			try
 			{
-				MySqlToListNamespace(ev);
+				LoadDataToListNamespace(ev);
 				ev.TxtOut.Text = string.Empty;
 				foreach (DataTableNamespace du in data_source_namespace)
 				{
@@ -130,7 +153,14 @@ namespace Evidencia
 				MessageBox.Show(ex.Message);
 			}
 		}
-		public void MySqlToListNamespace(Evidencia ev)
+
+		/// <summary>
+		/// Pripojenie app k phpmyadmin localhost stránke PHP, v ktorej stiahne celý obsah stránky do stringu, pomocou knižnice
+		/// JSONConvert odparsuje TEXT a zapíše ho do listu s názvom DataTableNamespace
+		/// </summary>
+		/// <param name="ev"></param>
+
+		public void LoadDataToListNamespace(Evidencia ev)
 		{
 			try
 			{
