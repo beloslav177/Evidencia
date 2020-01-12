@@ -49,7 +49,6 @@
 			this.backGround = new System.ComponentModel.BackgroundWorker();
 			this.txtSend = new System.Windows.Forms.TextBox();
 			this.txtReceive = new System.Windows.Forms.TextBox();
-			this.btnShowAllReords = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// txtOutput
@@ -240,23 +239,12 @@
 			this.txtReceive.Size = new System.Drawing.Size(101, 118);
 			this.txtReceive.TabIndex = 44;
 			// 
-			// btnShowAllReords
-			// 
-			this.btnShowAllReords.Location = new System.Drawing.Point(391, 76);
-			this.btnShowAllReords.Name = "btnShowAllReords";
-			this.btnShowAllReords.Size = new System.Drawing.Size(72, 23);
-			this.btnShowAllReords.TabIndex = 45;
-			this.btnShowAllReords.Text = "Tabuľka";
-			this.btnShowAllReords.UseVisualStyleBackColor = true;
-			this.btnShowAllReords.Click += new System.EventHandler(this.btnShowAllReords_Click);
-			// 
 			// Evidencia
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.ActiveCaption;
 			this.ClientSize = new System.Drawing.Size(699, 322);
-			this.Controls.Add(this.btnShowAllReords);
 			this.Controls.Add(this.txtReceive);
 			this.Controls.Add(this.txtSend);
 			this.Controls.Add(this.prgBarBack);
@@ -307,7 +295,6 @@
 		private System.ComponentModel.BackgroundWorker backGround;
 		private System.Windows.Forms.TextBox txtSend;
 		private System.Windows.Forms.TextBox txtReceive;
-		private System.Windows.Forms.Button btnShowAllReords;
 	}
 }
 

@@ -9,7 +9,8 @@ namespace Evidencia
 {
 	public class Selecting
 	{
-		//TODO:  oksušať reťazec znakov v barcode,  nanovo vytvoriť nový projekt s inými názvami, selecting v comboboxe vytvoriť aj možnosť vybrať všetky, 
+		//TODO: vybrať všetky v combobox pre SelectLocker, ak vyberiem room a po stlačení tlačidla vymazať daná vybraná položka v room sa nezobrazi v combobox zznova
+
 		private List<Record> SelectRoom = new List<Record>();
 		private List<Record> SelectLocker = new List<Record>();
 		private List<Record> SelectShelve = new List<Record>();
@@ -19,7 +20,8 @@ namespace Evidencia
 		private string miestnostiAll = "Všetky položky";
 		private string skrineAll = "Všetky položky";
 		private string polickyAll = "Všetky položky";
-		public void SelectDataToCombo(Evidencia ev)
+
+		public void loadDataToComboBoxes(Evidencia ev)
 		{
 			try
 			{
@@ -31,18 +33,18 @@ namespace Evidencia
 				}
 				List<string> miestnosti = ev.localDb.zaznamyNamespace.Select(x => x.New).ToList();
 				miestnosti.Sort();
-				ev.cmbRoom.Items.AddRange(miestnosti.ToArray());
 				ev.cmbRoom.Items.Add(miestnostiAll);
+				ev.cmbRoom.Items.AddRange(miestnosti.ToArray());
 
 				List<string> skrine = ev.localDb.zaznamyRecord.Select(x => x.place_locker).Distinct().ToList() ;
 				skrine.Sort();
-				ev.cmbLocker.Items.AddRange(skrine.ToArray());
 				ev.cmbLocker.Items.Add(skrineAll);
+				ev.cmbLocker.Items.AddRange(skrine.ToArray());
 
 				List<string> policky = ev.localDb .zaznamyRecord.Select(x => x.place_shelve).Distinct().ToList();
 				policky.Sort();
-				ev.cmbShelve.Items.AddRange(policky.ToArray());
 				ev.cmbShelve.Items.Add(polickyAll);
+				ev.cmbShelve.Items.AddRange(policky.ToArray());
 
 				if (ev.cmbRoom.SelectedIndex < 1)
 				{
@@ -62,30 +64,16 @@ namespace Evidencia
 			}
 		}
 
-		public void ShowAllTableRecords(Evidencia ev)
-		{
-			AllRoom = ev.localDb.zaznamyRecord;
-
-			foreach (var item in AllRoom)
-			{
-				ev.listBox.DataSource = AllRoom;
-			}
-		}
-
-
-		public void showRooms(Evidencia ev)
+		public void listboxDataRoom(Evidencia ev)
 		{
 			try
 			{
 				ev.cmbLocker.Enabled = false;
 				ev.cmbShelve.Enabled = false;
-
 				string roomSap;
 
 				if (ev.cmbRoom.Text != miestnostiAll)
 				{
-
-
 					roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
 					SelectRoom = ev.localDb.zaznamyRecord.Where(x =>
 						(x.place_room_sap == roomSap)).ToList();
@@ -93,8 +81,7 @@ namespace Evidencia
 
 					if ((SelectRoom?.Count ?? 0) == 0)
 					{
-						ev.listBox.DataSource = null;
-						
+						ev.listBox.DataSource = null;						
 						MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
 						ev.cmbLocker.Enabled = false;
 						ev.cmbShelve.Enabled = false;
@@ -114,34 +101,31 @@ namespace Evidencia
 			}
 
 		}
-		public void showLockers(Evidencia ev)
+		public void listboxDataLocker(Evidencia ev)
 		{
 			try
 			{
-				SelectLocker = SelectRoom.Where(x =>
+				ev.cmbShelve.Enabled = false;
+				if (ev.cmbLocker.Text != skrineAll)
+				{
+					SelectLocker = SelectRoom.Where(x =>
 						(x.place_locker == ev.cmbLocker.Text)).ToList();
-				if ((SelectLocker?.Count ?? 0) == 0)
-				{
-					MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
-				}
-				if (ev.cmbRoom.SelectedText.Length == miestnostiAll.Length)
-				{
-					foreach (var item in AllLocker)
-					{
-						ev.listBox.DataSource = AllLocker;
-					}
+					ev.cmbShelve.Enabled = true;
 
+					if ((SelectLocker?.Count ?? 0) == 0)
+					{
+						ev.listBox.DataSource = null;
+						MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
+						ev.cmbShelve.Enabled = false;
+					}
+					ev.listBox.DataSource = SelectLocker;
 				}
 				else
 				{
-					foreach (var item in SelectLocker)
-					{
-						ev.listBox.DataSource = SelectLocker;
-						ev.cmbShelve.Enabled = true;	
-					}
+					ev.listBox.DataSource = ev.localDb.zaznamyRecord.Where(x =>
+					x.place_room_sap == ev.cmbRoom.Text).ToList();
 				}
-
-
+					
 			}
 			catch (Exception exc)
 			{
@@ -149,28 +133,26 @@ namespace Evidencia
 				MessageBox.Show(exc.Message);
 			}
 		}
-		public void showShelves(Evidencia ev)
+		public void listboxDataShelve(Evidencia ev)
 		{
 			try
 			{
-				SelectShelve = SelectLocker.Where(x =>
+				if (ev.cmbShelve.Text != polickyAll)
+				{
+					SelectShelve = SelectLocker.Where(x =>
 						(x.place_shelve == ev.cmbShelve.Text)).ToList();
-				if ((SelectShelve?.Count ?? 0) == 0)
-				{
-					MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
-				}
-				if (ev.cmbShelve.Text == polickyAll)
-				{
-					ev.listBox.DataSource = AllShelve;
+					if ((SelectShelve?.Count ?? 0) == 0)
+					{
+						ev.listBox.DataSource = null;
+						MessageBox.Show("Daná požiadavka sa nenachádza v tabuľke.");
+					}
 				}
 				else
 				{
-					foreach (var item in SelectShelve)
-					{
-						ev.listBox.DataSource = SelectShelve;
-					}
-
+					SelectShelve = ev.localDb.zaznamyRecord.Where(x =>
+						(x.place_locker == ev.cmbLocker.Text)).ToList();
 				}
+				ev.listBox.DataSource = SelectShelve;
 
 			}
 			catch (Exception exc)

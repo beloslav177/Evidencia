@@ -14,7 +14,6 @@ namespace Evidencia
 {
 	public partial class Evidencia : Form
 	{
-
 		public TextBox TxtOut { get { return txtOutput; } }
 		public TextBox txtTry { get { return txtTrying; } }
 		public TextBox txtIP { get { return txtIpAddress; } }
@@ -53,7 +52,7 @@ namespace Evidencia
 			localDb.SqliteNamespaceToList(this);
 			localDb.SqliteRecordToList(this);
 
-			selecting.SelectDataToCombo(this);
+			selecting.loadDataToComboBoxes(this);
 			selecting.cmbBoxEnabled(this);
 
 			btnStopScanning.Enabled = false;
@@ -73,22 +72,17 @@ namespace Evidencia
 
 		private void cmbBoxRoom_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			selecting.showRooms(this);
+			selecting.listboxDataRoom(this);
 		}
 
 		private void cmbBoxLocker_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			selecting.showLockers(this);
+			selecting.listboxDataLocker(this);
 		}
 
 		private void cmbBoxShelve_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			selecting.showShelves(this);
-		}
-
-		private void btnShowAllReords_Click(object sender, EventArgs e)
-		{
-			selecting.ShowAllTableRecords(this);
+			selecting.listboxDataShelve(this);
 		}
 
 		private void btnClearData_Click(object sender, EventArgs e)
@@ -96,6 +90,13 @@ namespace Evidencia
 			cmbLocker.Items.Remove(cmbBoxLocker.Text);
 			cmbRoom.Items.Remove(cmbBoxRoom.Text);
 			cmbShelve.Items.Remove(cmbBoxShelve.Text);
+
+			localDb.SqliteUserToList(this);
+			localDb.SqliteNamespaceToList(this);
+			localDb.SqliteRecordToList(this);
+			//TODO: po stlčeni tlačidla z cmbBox vymaže aktualny adresar miestnost, skrina alebo polička
+			selecting.cmbBoxEnabled(this);
+
 			listBox.DataSource = null;
 			cmbLocker.Enabled = false;
 			cmbShelve.Enabled = false;
