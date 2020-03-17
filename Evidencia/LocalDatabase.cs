@@ -43,7 +43,7 @@ namespace Evidencia
 				string insertCmd = "INSERT INTO kteem_record (id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap, " +
 					"main_kategoria, main_number, main_year_tuke, main_year_kteem, main_year_record, private, id_owner, id_owner_temp, " +
 					"data_name, data_sort1, data_sort2, data_production_code, data_price_sk, data_price_eu, data_repair, data_discard, data_rfid, " +
-					"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4) VALUES";
+					"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4, inr) VALUES";
 
 
 				//string insertCmd = "INSERT INTO kteem_record (id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap," +
@@ -55,7 +55,7 @@ namespace Evidencia
 					if (insertCmd != "INSERT INTO kteem_record (id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap, " +
 					"main_kategoria, main_number, main_year_tuke, main_year_kteem, main_year_record, private, id_owner, id_owner_temp, " +
 					"data_name, data_sort1, data_sort2, data_production_code, data_price_sk, data_price_eu, data_repair, data_discard, data_rfid, " +
-					"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4) VALUES") insertCmd += " ";
+					"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4, inr) VALUES") insertCmd += " ";
 
 					insertCmd += "(" + udaj.ID + "," + "'" + udaj.meta_prev + "'" + "," + udaj.meta_book + "," + udaj.meta_page + "," + "'" + udaj.meta_kategoria + "'" + "," +
 						udaj.meta_kategoria_number + "," + udaj.meta_sap + "," + "'" + udaj.main_kategoria + "'" + "," + udaj.main_number + "," + udaj.main_year_tuke + "," + udaj.main_year_kteem + "," +
@@ -63,7 +63,7 @@ namespace Evidencia
 						"'" + udaj.data_sort1 + "'" + "," + "'" + udaj.data_sort2 + "'" + "," + "'" + udaj.data_production_code + "'" + "," + udaj.data_price_sk + "," +
 						udaj.data_price_eu + "," + "'" + udaj.data_repair + "'" + "," + "'" + udaj.data_discard + "'" + "," + "'" + udaj.data_rfid + "'" + "," +
 						"'" + udaj.place_room_sap + "'" + "," + "'" + udaj.place_room + "'" + "," + "'" + udaj.place_locker + "'" + "," + udaj.place_shelve + "," + udaj.borrowed + "," + "'" + udaj.borrowed_date + "'" + "," +
-						"'" + udaj.dummy1 + "'" + "," + "'" + udaj.dummy2 + "'" + "," + "'" + udaj.dummy3 + "'" + "," + "'" + udaj.dummy4 + "'" + ")" + ",";
+						"'" + udaj.dummy1 + "'" + "," + "'" + udaj.dummy2 + "'" + "," + "'" + udaj.dummy3 + "'" + "," + "'" + udaj.dummy4 + "'" + "," + "'" + udaj.inr + "'" + ")" + ",";
 
 
 					//if (insertCmd != "INSERT INTO kteem_record(id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap, main_kategoria," +
@@ -100,7 +100,7 @@ namespace Evidencia
 			string selectSqliteTable = "SELECT id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap, " +
 				"main_kategoria, main_number, main_year_tuke, main_year_kteem, main_year_record, private, id_owner, id_owner_temp, " +
 				"data_name, data_sort1, data_sort2, data_production_code, data_price_sk, data_price_eu, data_repair, data_discard, data_rfid, " +
-				"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4 FROM kteem_record";
+				"place_room_sap, place_room, place_locker, place_shelve, borrowed, borrowed_date, dummy1, dummy2, dummy3, dummy4, inr FROM kteem_record";
 			try
 			{
 				con = new SQLiteConnection("Data Source=" + dbFile);
@@ -145,7 +145,8 @@ namespace Evidencia
 						dummy1 = reader[30].ToString(),
 						dummy2 = reader[31].ToString(),
 						dummy3 = reader[32].ToString(),
-						dummy4 = reader[33].ToString()
+						dummy4 = reader[33].ToString(), 
+						inr = reader[34].ToString()
 					});
 				}
 				reader.Close();

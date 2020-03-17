@@ -27,7 +27,7 @@ namespace Evidencia
 				ev.TxtOut.Text = string.Empty;
 				foreach (DataTableRecords du in data_source_records)
 				{
-					ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + Environment.NewLine;
+					ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + "\t" + du.inr + Environment.NewLine;
 
 				}
 

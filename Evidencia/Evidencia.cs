@@ -17,9 +17,11 @@ namespace Evidencia
 		public TextBox TxtOut { get { return txtOutput; } }
 		public TextBox txtTry { get { return txtTrying; } }
 		public TextBox txtIP { get { return txtIpAddress; } }
+		public TextBox txtInr { get { return txtINR; } }
 		public TextBox txtSender { get { return txtSend; } }
 		public TextBox txtReceiver { get { return txtReceive; } }
 		public ListBox listBox { get { return lstBox; } }
+		public ListBox listINR { get { return lstINR; } }
 		public ComboBox cmbRoom { get { return cmbBoxRoom; } }
 		public ComboBox cmbLocker { get { return cmbBoxLocker; } }
 		public ComboBox cmbShelve { get { return cmbBoxShelve; } }
@@ -29,6 +31,8 @@ namespace Evidencia
 		public Button btnScaning { get { return btnScan; } }
 		public Button btnServerConnecting { get { return btnServerConnect; } }
 		public Button btnStopScanning { get { return btnStopScan; } }
+		public Button btnColored { get { return btnColor; } }
+		public Button btnESPstringSend { get { return btnEspSend; } }
 		public BackgroundWorker BackgroundWorker { get { return backGround; } }
 
 		public OnlineDatabase onDb = new OnlineDatabase();
@@ -41,7 +45,7 @@ namespace Evidencia
 		public int numBytesRead;
 		public string ReadData;
 		public int Count;
-		public string responseData;
+		public string SAP;
 
 
 		public Evidencia()
@@ -58,16 +62,27 @@ namespace Evidencia
 			btnStopScanning.Enabled = false;
 			btnScaning.Enabled = false;
 			btnDisconnect.Enabled = false;
+			btnESPstringSend.Enabled = false;
+			btnColored.BackColor = Color.Red;
 
-			tcp.RemoveChars(this);
+			//tcp.RemoveChars(this);
 
 		}
 
 		private void btnOnDatabase_Click(object sender, EventArgs e)
 		{
-			onDb.LoadDataUsers(this);
-			onDb.LoadDataNamespace(this);
-			onDb.LoadDataRecords(this);
+			try
+			{
+				onDb.LoadDataUsers(this);
+				onDb.LoadDataNamespace(this);
+				onDb.LoadDataRecords(this);
+
+			}
+			catch (Exception)
+			{
+
+				MessageBox.Show("WAMP server nieje spustený.");
+			}
 		}
 
 		private void cmbBoxRoom_SelectedIndexChanged(object sender, EventArgs e)
@@ -87,27 +102,37 @@ namespace Evidencia
 
 		private void btnClearData_Click(object sender, EventArgs e)
 		{
-			cmbLocker.Items.Remove(cmbBoxLocker.Text);
-			cmbRoom.Items.Remove(cmbBoxRoom.Text);
-			cmbShelve.Items.Remove(cmbBoxShelve.Text);
+			//cmbRoom.Items.Remove(cmbBoxRoom.Text);
+			//cmbLocker.Items.Remove(cmbBoxLocker.Text);
+			//cmbShelve.Items.Remove(cmbBoxShelve.Text);
+
+			cmbRoom.ResetText();
+			cmbLocker.ResetText();
+			cmbShelve.ResetText();
+			selecting.RoomLockerShelve = "";
 
 			localDb.SqliteUserToList(this);
 			localDb.SqliteNamespaceToList(this);
 			localDb.SqliteRecordToList(this);
+
 			//TODO: po stlčeni tlačidla z cmbBox vymaže aktualny adresar miestnost, skrina alebo polička
 			selecting.cmbBoxEnabled(this);
 
-			listBox.DataSource = null;
+			selecting.FlushESPstring();
+			selecting.SendEspRemove(this);
+
 			cmbLocker.Enabled = false;
 			cmbShelve.Enabled = false;
+			listBox.DataSource = null;
 			txtReceiver.Text = string.Empty;
 			txtSender.Text = string.Empty;
 			TxtOut.Text = string.Empty;
+			txtInr.Text = string.Empty; 
 		}
 
 		private void Update(object sender, DoWorkEventArgs e)
 		{
-			tcp.Connect(txtIpAddress.Text, 5045);
+			tcp.Connect(txtIpAddress.Text, 5045, this);
 			if (tcp.tcpClient.Connected && !backGround.CancellationPending)
 			{
 				try
@@ -116,47 +141,47 @@ namespace Evidencia
 					using (MemoryStream ms = new MemoryStream())
 					{
 						Debug.WriteLine("Data sa prijmaju");
+						btnColored.BackColor = Color.Green;
 						while ((tcp.netStream != null))
 						{
+							ms.SetLength(0);
 							numBytesRead = tcp.netStream.Read(data, 0, data.Length);
 							ms.Write(data, 0, numBytesRead);
 							Debug.WriteLine("numBytesRead=" + numBytesRead.ToString() + "; msCount=" + ms.ToArray().Count());
-							responseData = string.Empty;
+							string responseData = "";
 							responseData = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
-							ReadData = responseData;
 
-							while (responseData != string.Empty)
+							if (responseData != string.Empty)
 							{
-								backGround.ReportProgress(0, responseData);
-								responseData = responseData.Substring(9, responseData.Length - 14);
+								//backGround.ReportProgress(0, responseData);
+								SAP=responseData.Substring(8, responseData.Length - 14);
 
-								//UpdateChanged(15, responseData);
+								this.Invoke(new Action(() =>
+								{									
+									txtTry.Text = SAP;
+									selecting.ControlSapNumber(this);
+								}));
+								Debug.WriteLine("responseData=" + responseData.ToString() + "; SAP=" + SAP.ToString() );
+								//UpdateChanged(this, new ProgressChangedEventArgs(15, responseData.Substring(8, responseData.Length - 14)));								
 							}
+							responseData = string.Empty;	
+							Debug.WriteLine("barcodeReaded=" + selecting.barcodeReaded.ToString() + "; barcodeReadedCount=" + selecting.barcodeReadedCount.ToString() + "; barcodeCount =" + selecting.barcodeCount.ToString());
 						}
 					}
 				}
-				catch (Exception)
+				catch (Exception ex)
 				{
 					tcp.Disconnect();
 				}
 			}
-			//if (backGround.CancellationPending)
-			//{
-			//    e.Cancel = true;
-			//    backGround.ReportProgress(i, "TEst: uz som na");
-			//    backGround.ReportProgress(i, msg);
-			//    return;
-			//}
-			//backGround.ReportProgress(100);
 		}
 
 		private void UpdateChanged(object sender, ProgressChangedEventArgs e)
 		{
-			prgBarBack.Value = e.ProgressPercentage;
-			msg = (string)e.UserState;
+			//prgBarBack.Value = e.ProgressPercentage;
+			string sap_nr = (string)e.UserState;
+			//txtTrying.Text = string.Empty;
 
-
-			txtReceiver.Text = responseData;
 		}
 
 		private void Completed(object sender, RunWorkerCompletedEventArgs e)
@@ -197,5 +222,13 @@ namespace Evidencia
 			tcp.stopScanReader(this);
 		}
 
+		private void btnEspSend_Click_1(object sender, EventArgs e)
+		{
+			selecting.SendEspString(this);
+		}
+
+		private void prgBarBack_Click(object sender, EventArgs e)
+		{		
+		}
 	}
 }

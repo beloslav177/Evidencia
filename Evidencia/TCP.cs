@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -16,11 +17,6 @@ namespace Evidencia
 		public NetworkStream netStream;
 		public TcpClient tcpClient;
 		private int numBytesRead;
-		private string Scan = "B";
-		private string StopScan = "C";
-		private string ContinueScan = "E";
-		private string RepeatEnable = "F";
-		private string RepeatDisable = "G";
 		private char ScanChar = 'B';
 		private char StopChar = 'C';
 		private char ContinueScanChar = 'E';
@@ -29,7 +25,7 @@ namespace Evidencia
 		public TCP()
 		{ }
 
-		public bool Connect(string hostName, int port)
+		public bool Connect(string hostName, int port, Evidencia ev)
 		{
 			tcpClient = new TcpClient();
 
@@ -38,6 +34,11 @@ namespace Evidencia
 				tcpClient.Connect(hostName, port);
 				netStream = tcpClient.GetStream();
 				Debug.WriteLine("Connected");
+				SendMsg(RepeatDisableChar);
+				if (tcpClient.Connected)
+				{
+					ev.btnColored.BackColor = Color.Green;
+				}
 				return true;
 			}
 			catch (Exception e)
@@ -65,6 +66,7 @@ namespace Evidencia
 					ASCIIEncoding asen = new ASCIIEncoding();
 					byte[] sendData = asen.GetBytes(msg.ToString());
 					stream.Write(sendData, 0, sendData.Length);
+
 					return true;
 				}
 				else
@@ -79,6 +81,34 @@ namespace Evidencia
 			}
 			return false;
 		}
+
+		public bool SendMsg(string EspString)
+		{
+			if (tcpClient == null) return false;
+			try
+			{
+				if (tcpClient.Connected)
+				{
+					Stream stream = tcpClient.GetStream();
+					ASCIIEncoding asen = new ASCIIEncoding();
+					byte[] sendData = asen.GetBytes(EspString);
+					stream.Write(sendData, 0, sendData.Length);
+
+					return true;
+				}
+				else
+				{
+					Debug.WriteLine("TCP client not connected!");
+					return false;
+				}
+			}
+			catch (Exception e)
+			{
+				Debug.WriteLine("Error..... " + e.StackTrace);
+			}
+			return false;
+		}
+
 		public void ReadMsg(string responseData)
 		{
 			if (!tcpClient.Connected || tcpClient == null)
@@ -137,22 +167,23 @@ namespace Evidencia
 		{
 			try
 			{
-
-				if (tcpClient.Connected)
-				{
+				//if (!tcpClient.Connected)
+				//{
 					ev.btnServerConnecting.Enabled = false;
 					ev.btnScaning.Enabled = true;
 					ev.btnDisconnect.Enabled = true;
 					ev.btnStopScanning.Enabled = false;
 					ev.BackgroundWorker.RunWorkerAsync();
-				}
-				else
-				{
-					MessageBox.Show("Server nie je zapnutý");
-				}
+				
+				//}
+				//else
+				//{
+				//	MessageBox.Show("Server nie je zapnutý");
+				//}
 			}
 			catch (Exception)
 			{
+				ev.btnDisconnect.Enabled = true;
 				MessageBox.Show("Server nie je zapnutý");
 			}
 		}
@@ -162,23 +193,28 @@ namespace Evidencia
 
 			try
 			{
-				if (tcpClient.Connected)
-				{
+				//if (tcpClient.Connected)
+				//{
 					ev.BackgroundWorker.CancelAsync();
 					Disconnect();
 					ev.btnDisconnect.Enabled = false;
 					ev.btnStopScanning.Enabled = false;
 					ev.btnScaning.Enabled = false;
-				}
-				else
+				if (!tcpClient.Connected)
 				{
-					MessageBox.Show("Server nie je zapnutý");
+					ev.btnColored.BackColor = Color.Red;
 				}
-				
+				//}
+				//else
+				//{
+				//	MessageBox.Show("Server nie je zapnutý");
+				//}
+
 			}
 			catch (Exception)
 			{
 				MessageBox.Show("Klient je pripojený k serveru");
+				ev.btnScaning.Enabled = false;
 			}
 		}
 
@@ -193,9 +229,11 @@ namespace Evidencia
 				//SendMsg(ContinueScanChar);
 				//ev.txtSender.Text = ContinueScanChar.ToString();   //   "E"
 
-				SendMsg(ScanChar);
-				SendMsg(RepeatEnableChar);
-				ev.txtSender.Text = RepeatEnableChar.ToString(); //   "F"
+				//SendMsg(ScanChar);
+				SendMsg(ContinueScanChar);
+				//SendMsg(RepeatDisableChar);
+				//SendMsg(RepeatEnableChar);
+				ev.txtSender.Text = ContinueScanChar.ToString(); //   "F"
 
 				//tcp.SendMsg(RepeatDisable);
 				//txtOut.Text = RepeatDisable.ToString();  //   "G"
@@ -212,6 +250,7 @@ namespace Evidencia
 
 		public void stopScanReader(Evidencia ev)
 		{
+			//SendMsg(RepeatDisableChar);
 			SendMsg(StopChar);
 			ev.txtSender.Text = StopChar.ToString();
 

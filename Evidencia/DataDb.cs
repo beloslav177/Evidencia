@@ -47,12 +47,13 @@ namespace Evidencia
 		public string dummy2 { get; set; }
 		public string dummy3 { get; set; }
 		public string dummy4 { get; set; }
+		public string inr { get; set; }
+
 		public override string ToString()
 		{
-			return $"{main_year_tuke}/" +
-					$"{main_year_kteem}/" +
-					$"{main_year_record}\t" +
-					$"{data_name}\t" +
+			return	$" {inr}\t" +
+					$" {meta_sap}\t" +
+					$"{data_name}\t\t" +
 					$"{place_room_sap}\t" +
 					$"{place_locker}\t" +
 					$" {place_shelve}";
@@ -172,6 +173,9 @@ namespace Evidencia
 
 		[JsonProperty("dummy4")]
 		public string dummy4 { get; set; }
+
+		[JsonProperty("INR")]
+		public string inr { get; set; }
 	}
 
 	public class DataTableUsers

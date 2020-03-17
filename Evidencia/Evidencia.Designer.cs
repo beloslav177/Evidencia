@@ -45,10 +45,13 @@
 			this.btnDisconnectServer = new System.Windows.Forms.Button();
 			this.btnScan = new System.Windows.Forms.Button();
 			this.btnStopScan = new System.Windows.Forms.Button();
-			this.prgBarBack = new System.Windows.Forms.ProgressBar();
 			this.backGround = new System.ComponentModel.BackgroundWorker();
 			this.txtSend = new System.Windows.Forms.TextBox();
 			this.txtReceive = new System.Windows.Forms.TextBox();
+			this.lstINR = new System.Windows.Forms.ListBox();
+			this.btnEspSend = new System.Windows.Forms.Button();
+			this.txtINR = new System.Windows.Forms.TextBox();
+			this.btnColor = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// txtOutput
@@ -156,7 +159,7 @@
 			this.txtIpAddress.Name = "txtIpAddress";
 			this.txtIpAddress.Size = new System.Drawing.Size(109, 22);
 			this.txtIpAddress.TabIndex = 36;
-			this.txtIpAddress.Text = "192.168.0.107";
+			this.txtIpAddress.Text = "192.168.0.101";
 			this.txtIpAddress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
 			// 
 			// lblIPaddress
@@ -208,13 +211,6 @@
 			this.btnStopScan.UseVisualStyleBackColor = true;
 			this.btnStopScan.Click += new System.EventHandler(this.btnStopScan_Click);
 			// 
-			// prgBarBack
-			// 
-			this.prgBarBack.Location = new System.Drawing.Point(185, 8);
-			this.prgBarBack.Name = "prgBarBack";
-			this.prgBarBack.Size = new System.Drawing.Size(54, 23);
-			this.prgBarBack.TabIndex = 42;
-			// 
 			// backGround
 			// 
 			this.backGround.WorkerReportsProgress = true;
@@ -239,15 +235,52 @@
 			this.txtReceive.Size = new System.Drawing.Size(101, 118);
 			this.txtReceive.TabIndex = 44;
 			// 
+			// lstINR
+			// 
+			this.lstINR.FormattingEnabled = true;
+			this.lstINR.Location = new System.Drawing.Point(12, 324);
+			this.lstINR.Name = "lstINR";
+			this.lstINR.Size = new System.Drawing.Size(677, 56);
+			this.lstINR.TabIndex = 45;
+			// 
+			// btnEspSend
+			// 
+			this.btnEspSend.Location = new System.Drawing.Point(391, 76);
+			this.btnEspSend.Name = "btnEspSend";
+			this.btnEspSend.Size = new System.Drawing.Size(71, 23);
+			this.btnEspSend.TabIndex = 46;
+			this.btnEspSend.Text = "Poslať";
+			this.btnEspSend.UseVisualStyleBackColor = true;
+			this.btnEspSend.Click += new System.EventHandler(this.btnEspSend_Click_1);
+			// 
+			// txtINR
+			// 
+			this.txtINR.Location = new System.Drawing.Point(12, 386);
+			this.txtINR.Multiline = true;
+			this.txtINR.Name = "txtINR";
+			this.txtINR.Size = new System.Drawing.Size(217, 113);
+			this.txtINR.TabIndex = 47;
+			// 
+			// btnColor
+			// 
+			this.btnColor.Location = new System.Drawing.Point(185, 8);
+			this.btnColor.Name = "btnColor";
+			this.btnColor.Size = new System.Drawing.Size(54, 23);
+			this.btnColor.TabIndex = 48;
+			this.btnColor.UseVisualStyleBackColor = true;
+			// 
 			// Evidencia
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.ActiveCaption;
-			this.ClientSize = new System.Drawing.Size(699, 322);
+			this.ClientSize = new System.Drawing.Size(700, 511);
+			this.Controls.Add(this.btnColor);
+			this.Controls.Add(this.txtINR);
+			this.Controls.Add(this.btnEspSend);
+			this.Controls.Add(this.lstINR);
 			this.Controls.Add(this.txtReceive);
 			this.Controls.Add(this.txtSend);
-			this.Controls.Add(this.prgBarBack);
 			this.Controls.Add(this.btnStopScan);
 			this.Controls.Add(this.btnScan);
 			this.Controls.Add(this.btnDisconnectServer);
@@ -291,10 +324,13 @@
 		private System.Windows.Forms.Button btnDisconnectServer;
 		private System.Windows.Forms.Button btnScan;
 		private System.Windows.Forms.Button btnStopScan;
-		private System.Windows.Forms.ProgressBar prgBarBack;
 		private System.ComponentModel.BackgroundWorker backGround;
 		private System.Windows.Forms.TextBox txtSend;
 		private System.Windows.Forms.TextBox txtReceive;
+		private System.Windows.Forms.ListBox lstINR;
+		private System.Windows.Forms.Button btnEspSend;
+		private System.Windows.Forms.TextBox txtINR;
+		private System.Windows.Forms.Button btnColor;
 	}
 }
 
