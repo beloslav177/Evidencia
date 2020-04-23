@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Evidencia
@@ -20,14 +17,15 @@ namespace Evidencia
 		public List<Record> zaznamyRecord;
 		public List<User> zaznamyUser;
 		public List<Namespace> zaznamyNamespace;
+		public List<Scanned> Items;
 
 
-		/// <summary>
-		/// Funkcia UPDATE, ktorá slúži na vloženie údajov z Listu DataTableRecords do lokálnej databázy Majetok.db, tabuľky Records v SQLite formáte databázy, pred vložením údajov sa vymaže obsah danej tabuľky.
-		/// </summary>
-		/// <param name="udaje">premmenná, ktorá vyťahuje údaje z listu DataTableRecords</param>
-		/// <returns></returns>
-		public int ListRecordToSqlite(List<DataTableRecords> udaje)
+        /// <summary>
+        /// Funkcia UPDATE, ktorá slúži na vloženie údajov z Listu DataTableRecords do lokálnej databázy Majetok.db, tabuľky Records v SQLite formáte databázy, pred vložením údajov sa vymaže obsah danej tabuľky.
+        /// </summary>
+        /// <param name="udaje">premmenná, ktorá vyťahuje údaje z listu DataTableRecords</param>
+        /// <returns></returns>
+        public int ListRecordToSqlite(List<DataTableRecords> udaje)
 		{
 			string truncateTable = "DELETE FROM kteem_record";
 			//MessageBox.Show(dbFile);
@@ -97,6 +95,7 @@ namespace Evidencia
 		public void SqliteRecordToList(Evidencia ev)
 		{
 			zaznamyRecord = new List<Record>();
+			Items = new List<Scanned>();
 			string selectSqliteTable = "SELECT id, meta_prev, meta_book, meta_page, meta_kategoria, meta_kategoria_number, meta_sap, " +
 				"main_kategoria, main_number, main_year_tuke, main_year_kteem, main_year_record, private, id_owner, id_owner_temp, " +
 				"data_name, data_sort1, data_sort2, data_production_code, data_price_sk, data_price_eu, data_repair, data_discard, data_rfid, " +
@@ -146,6 +145,14 @@ namespace Evidencia
 						dummy2 = reader[31].ToString(),
 						dummy3 = reader[32].ToString(),
 						dummy4 = reader[33].ToString(), 
+						inr = reader[34].ToString()
+					});
+					Items.Add(new Scanned()
+					{
+						sap = reader[6].ToString(),
+						room = reader[24].ToString(),
+						locker = reader[26].ToString(),
+						shelve = (reader[27].ToString()),
 						inr = reader[34].ToString()
 					});
 				}

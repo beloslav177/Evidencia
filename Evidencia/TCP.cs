@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Evidencia
@@ -17,14 +14,18 @@ namespace Evidencia
 		public NetworkStream netStream;
 		public TcpClient tcpClient;
 		private int numBytesRead;
-		private char ScanChar = 'B';
 		private char StopChar = 'C';
 		private char ContinueScanChar = 'E';
-		private char RepeatEnableChar = 'F';
 		private char RepeatDisableChar = 'G';
 		public TCP()
 		{ }
-
+		/// <summary>
+		/// Funkcia pre pripojenie k IoT zariadeniu
+		/// </summary>
+		/// <param IPadresaIoTzariadenia="hostName"></param>
+		/// <param PortServera="port"></param>
+		/// <param Hl.Trieda="ev"></param>
+		/// <returns></returns>
 		public bool Connect(string hostName, int port, Evidencia ev)
 		{
 			tcpClient = new TcpClient();
@@ -47,14 +48,27 @@ namespace Evidencia
 			}
 			return false;
 		}
-		public void Disconnect()
+		/// <summary>
+		/// Funkcia pre odpojenie od IoT zariadenia
+		/// </summary>
+		/// <param name="ev"></param>
+		public void Disconnect(Evidencia ev)
 		{
 			if ((tcpClient != null) && (tcpClient.Connected))
 			{
 				tcpClient.GetStream().Close();
 				tcpClient.Close();
+				if (!tcpClient.Connected)
+				{
+					ev.btnColored.BackColor = Color.Red;
+				}
 			}
 		}
+		/// <summary>
+		/// Funkcia pre poslanie údajov IoT zariadeniu
+		/// </summary>
+		/// <param Posielanie znaku="msg"></param>
+		/// <returns></returns>
 		public bool SendMsg(char msg)
 		{
 			if (tcpClient == null) return false;
@@ -81,7 +95,11 @@ namespace Evidencia
 			}
 			return false;
 		}
-
+		/// <summary>
+		///  Funkcia pre poslanie údajov IoT zariadeniu
+		/// </summary>
+		/// <param Posielania reťazca znakov pre IoT zariadenie ohľadom údajov pre displej="EspString"></param>
+		/// <returns></returns>
 		public bool SendMsg(string EspString)
 		{
 			if (tcpClient == null) return false;
@@ -108,42 +126,10 @@ namespace Evidencia
 			}
 			return false;
 		}
-
-		public void ReadMsg(string responseData)
-		{
-			if (!tcpClient.Connected || tcpClient == null)
-				try
-				{
-					{
-						//byte[] data = new byte[1024];
-						//using (MemoryStream ms = new MemoryStream())
-						//{
-						//    Debug.WriteLine("Data sa prijmaju");
-						//    while (netStream!= null)
-						//    {
-						//        numBytesRead = netStream.Read(data, 0, data.Length);
-						//        ms.Write(data, 0, numBytesRead);
-						//        Debug.WriteLine("numBytesRead=" + numBytesRead.ToString() + "; msCount=" + ms.ToArray().Count());
-						//    }
-						//    str = Encoding.ASCII.GetString(ms.ToArray(), 0, (int)ms.Length);
-						//}
-
-						Byte[] data1 = new byte[1024];
-						while (netStream != null)
-						{
-							responseData = String.Empty;
-							numBytesRead = netStream.Read(data1, 0, data1.Length);
-							responseData = Encoding.ASCII.GetString(data1, 0, numBytesRead);
-						}
-
-					}
-				}
-				catch (Exception)
-				{
-
-					throw;
-				}
-		}
+		/// <summary>
+		/// Testovacia metóda pre orezanie reťazca znakov
+		/// </summary>
+		/// <param name="ev"></param>
 		public void RemoveChars(Evidencia ev)
 		{
 			try
@@ -163,6 +149,10 @@ namespace Evidencia
 
 		}
 
+		/// <summary>
+		/// Spustenie triedy BackgroundWorker metódy RunWorkerAsync
+		/// </summary>
+		/// <param name="ev"></param>
 		public void serverConnect(Evidencia ev)
 		{
 			try
@@ -187,7 +177,10 @@ namespace Evidencia
 				MessageBox.Show("Server nie je zapnutý");
 			}
 		}
-
+		/// <summary>
+		/// Funkcia pre vypnutie triedy Backgroundworker metódou CancelAsync, v tejto metode je aj metóda Disconnect, ktorá odpojí aplikáciu z IoT zariadenia
+		/// </summary>
+		/// <param name="ev"></param>
 		public void serverDisconnect(Evidencia ev)
 		{
 
@@ -196,14 +189,11 @@ namespace Evidencia
 				//if (tcpClient.Connected)
 				//{
 					ev.BackgroundWorker.CancelAsync();
-					Disconnect();
+					Disconnect(ev);
 					ev.btnDisconnect.Enabled = false;
 					ev.btnStopScanning.Enabled = false;
 					ev.btnScaning.Enabled = false;
-				if (!tcpClient.Connected)
-				{
-					ev.btnColored.BackColor = Color.Red;
-				}
+				
 				//}
 				//else
 				//{
@@ -217,7 +207,10 @@ namespace Evidencia
 				ev.btnScaning.Enabled = false;
 			}
 		}
-
+		/// <summary>
+		/// Funkcia pre posielanie údajov do IoT zariadenia, funkcionalita pre modul čítačky zapnutie 
+		/// </summary>
+		/// <param name="ev"></param>
 		public void scanReader(Evidencia ev)
 		{
 			try
@@ -248,6 +241,10 @@ namespace Evidencia
 			}
 		}
 
+		/// <summary>
+		/// Funkcia pre posielanie údajov do IoT zariadenia, funkcionalita pre modul čítačky vypnutie.
+		/// </summary>
+		/// <param name="ev"></param>
 		public void stopScanReader(Evidencia ev)
 		{
 			//SendMsg(RepeatDisableChar);

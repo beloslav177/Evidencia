@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Evidencia
@@ -19,8 +16,11 @@ namespace Evidencia
 		public TextBox txtIP { get { return txtIpAddress; } }
 		public TextBox txtInr { get { return txtINR; } }
 		public TextBox txtSender { get { return txtSend; } }
-		public TextBox txtReceiver { get { return txtReceive; } }
+		public TextBox txtReceiver { get { return txtReceive; } }		
 		public ListBox listBox { get { return lstBox; } }
+		public ListBox lstBoxSpravne { get { return listBoxNaskenovane; } }
+		public ListBox lstBoxOcakavane { get { return listBoxNenaskenovane; } }
+		public ListBox lstBoxNespravne { get { return listBoxNepotrebne; } }
 		public ListBox listINR { get { return lstINR; } }
 		public ComboBox cmbRoom { get { return cmbBoxRoom; } }
 		public ComboBox cmbLocker { get { return cmbBoxLocker; } }
@@ -30,15 +30,18 @@ namespace Evidencia
 		public Button btnOnline { get { return btnOnDatabase; } }
 		public Button btnScaning { get { return btnScan; } }
 		public Button btnServerConnecting { get { return btnServerConnect; } }
+		public Button btnOverenie { get { return btnHodnotenie; } }
 		public Button btnStopScanning { get { return btnStopScan; } }
 		public Button btnColored { get { return btnColor; } }
 		public Button btnESPstringSend { get { return btnEspSend; } }
 		public BackgroundWorker BackgroundWorker { get { return backGround; } }
+		public Label lblOcakavaneCounter { get { return lblOcakavaneCount; } }
 
 		public OnlineDatabase onDb = new OnlineDatabase();
 		public LocalDatabase localDb = new LocalDatabase();
 		public Selecting selecting = new Selecting();
 		public TCP tcp = new TCP();
+		public Record record = new Record();
 
 		public int i;
 		public string msg;
@@ -56,15 +59,15 @@ namespace Evidencia
 			localDb.SqliteNamespaceToList(this);
 			localDb.SqliteRecordToList(this);
 
-			selecting.loadDataToComboBoxes(this);
-			selecting.cmbBoxEnabled(this);
+			selecting.InitializeSelecting(this);			
 
 			btnStopScanning.Enabled = false;
 			btnScaning.Enabled = false;
 			btnDisconnect.Enabled = false;
-			btnESPstringSend.Enabled = false;
 			btnColored.BackColor = Color.Red;
 
+
+			//selecting.FillScan(this);
 			//tcp.RemoveChars(this);
 
 		}
@@ -81,7 +84,7 @@ namespace Evidencia
 			catch (Exception)
 			{
 
-				MessageBox.Show("WAMP server nieje spustený.");
+				MessageBox.Show("WampServer nieje spustený.");
 			}
 		}
 
@@ -106,28 +109,27 @@ namespace Evidencia
 			//cmbLocker.Items.Remove(cmbBoxLocker.Text);
 			//cmbShelve.Items.Remove(cmbBoxShelve.Text);
 
-			cmbRoom.ResetText();
+			cmbRoom.SelectedIndex = 11;
 			cmbLocker.ResetText();
 			cmbShelve.ResetText();
-			selecting.RoomLockerShelve = "";
 
 			localDb.SqliteUserToList(this);
 			localDb.SqliteNamespaceToList(this);
 			localDb.SqliteRecordToList(this);
 
-			//TODO: po stlčeni tlačidla z cmbBox vymaže aktualny adresar miestnost, skrina alebo polička
-			selecting.cmbBoxEnabled(this);
 
 			selecting.FlushESPstring();
 			selecting.SendEspRemove(this);
+			selecting.ScannedBarcodes(this);
+			
+			//selecting.FlushLists();
 
-			cmbLocker.Enabled = false;
 			cmbShelve.Enabled = false;
 			listBox.DataSource = null;
 			txtReceiver.Text = string.Empty;
 			txtSender.Text = string.Empty;
 			TxtOut.Text = string.Empty;
-			txtInr.Text = string.Empty; 
+			txtInr.Text = string.Empty;
 		}
 
 		private void Update(object sender, DoWorkEventArgs e)
@@ -159,19 +161,22 @@ namespace Evidencia
 								this.Invoke(new Action(() =>
 								{									
 									txtTry.Text = SAP;
-									selecting.ControlSapNumber(this);
+									selecting.FillScannedList(this);
+									//selecting.ScannedBarcodes(this);
+									//selecting.ControlSapNumber(this);
+									//TODO plnenie struct List oskenovane zariadenia
 								}));
 								Debug.WriteLine("responseData=" + responseData.ToString() + "; SAP=" + SAP.ToString() );
 								//UpdateChanged(this, new ProgressChangedEventArgs(15, responseData.Substring(8, responseData.Length - 14)));								
 							}
 							responseData = string.Empty;	
-							Debug.WriteLine("barcodeReaded=" + selecting.barcodeReaded.ToString() + "; barcodeReadedCount=" + selecting.barcodeReadedCount.ToString() + "; barcodeCount =" + selecting.barcodeCount.ToString());
+							//Debug.WriteLine("barcodeReaded=" + selecting.barcodeReaded.ToString() + "; barcodeReadedCount=" + selecting.barcodeReadedCount.ToString() + "; barcodeCount =" + selecting.barcodeCount.ToString());
 						}
 					}
 				}
 				catch (Exception ex)
 				{
-					tcp.Disconnect();
+					tcp.Disconnect(this);
 				}
 			}
 		}
@@ -229,6 +234,11 @@ namespace Evidencia
 
 		private void prgBarBack_Click(object sender, EventArgs e)
 		{		
+		}
+
+		private void btnHodnotenie_Click(object sender, EventArgs e)
+		{
+			selecting.ScannedBarcodes(this);
 		}
 	}
 }

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using MySql.Data.MySqlClient;
 using System.Windows.Forms;
-using System.Data;
 using Newtonsoft.Json;
 using System.Net;
-
+using System.Drawing;
 
 namespace Evidencia
 {
@@ -25,11 +23,11 @@ namespace Evidencia
 			{
 				LoadDataToListRecords(ev);
 				ev.TxtOut.Text = string.Empty;
-				foreach (DataTableRecords du in data_source_records)
-				{
-					ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + "\t" + du.inr + Environment.NewLine;
+				//foreach (DataTableRecords du in data_source_records)
+				//{
+				//	ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + "\t" + du.inr + Environment.NewLine;
 
-				}
+				//}
 
 			}
 			catch (Exception ex)
@@ -57,12 +55,13 @@ namespace Evidencia
 				data_source_records = JsonConvert.DeserializeObject<List<DataTableRecords>>(result);
 
 				ev.localDb.ListRecordToSqlite(data_source_records);
+				ev.btnOnline.BackColor = Color.Green;
 
 			}
 			catch (Exception ex)
 			{
 
-				MessageBox.Show(ex.Message);
+				MessageBox.Show("Server nie je zapnutý");
 			}
 			
 			//ev.localDatabase.ListRecordToSqlite(data_source_records);
@@ -84,17 +83,18 @@ namespace Evidencia
 			{
 				LoadDataToListUsers(ev);
 				ev.TxtOut.Text = string.Empty;
-				foreach (DataTableUsers du in data_source_users)
-				{
-					ev.TxtOut.Text += du.id.ToString() + "\t" + du.nickname + "\t" + du.InitializeKey + "\t" + Environment.NewLine;
+				//foreach (DataTableUsers du in data_source_users)
+				//{
+				//	ev.TxtOut.Text += du.id.ToString() + "\t" + du.nickname + "\t" + du.InitializeKey + "\t" + Environment.NewLine;
 
-				}
+				//}
 
 			}
 			catch (Exception ex )
 			{
 
-				MessageBox.Show(ex.Message);
+				MessageBox.Show("Server nie je zapnutý");
+
 			}
 		}
 		/// <summary>
@@ -141,17 +141,17 @@ namespace Evidencia
 			{
 				LoadDataToListNamespace(ev);
 				ev.TxtOut.Text = string.Empty;
-				foreach (DataTableNamespace du in data_source_namespace)
-				{
-					ev.TxtOut.Text += du.id.ToString() + "\t" + du.original_room + "\t" + du.New + "\t" + Environment.NewLine;
+				//foreach (DataTableNamespace du in data_source_namespace)
+				//{
+				//	ev.TxtOut.Text += du.id.ToString() + "\t" + du.original_room + "\t" + du.New + "\t" + Environment.NewLine;
 
-				}
+				//}
 
 			}
 			catch (Exception ex)
 			{
 
-				MessageBox.Show(ex.Message);
+				MessageBox.Show("Server nie je zapnutý");
 			}
 		}
 
@@ -180,7 +180,7 @@ namespace Evidencia
 			catch (Exception ex)
 			{
 
-				MessageBox.Show(ex.Message);
+				MessageBox.Show("Server nie je zapnutý");
 			}
 		}
 	}
