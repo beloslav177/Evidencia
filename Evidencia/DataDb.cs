@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Evidencia
@@ -14,6 +17,18 @@ namespace Evidencia
         public string shelve;
         public string inr;
 
+        public static Scanned ParseRow(string row)
+        {
+            var columns = row.Split(',');
+            return new Scanned()
+            {
+                sap = columns[0],
+                room = columns[1],
+                locker = columns[2], 
+                shelve = columns[3]
+            };        
+        }
+        
         public override string ToString()
         {
             return $" {inr}\t" +

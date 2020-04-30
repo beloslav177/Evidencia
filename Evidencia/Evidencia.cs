@@ -35,13 +35,12 @@ namespace Evidencia
 		public Button btnColored { get { return btnColor; } }
 		public Button btnESPstringSend { get { return btnEspSend; } }
 		public BackgroundWorker BackgroundWorker { get { return backGround; } }
-		public Label lblOcakavaneCounter { get { return lblOcakavaneCount; } }
+		public Label lblProductInformation { get { return lblProductInfo; } }
 
 		public OnlineDatabase onDb = new OnlineDatabase();
 		public LocalDatabase localDb = new LocalDatabase();
 		public Selecting selecting = new Selecting();
 		public TCP tcp = new TCP();
-		public Record record = new Record();
 
 		public int i;
 		public string msg;
@@ -117,10 +116,8 @@ namespace Evidencia
 			localDb.SqliteNamespaceToList(this);
 			localDb.SqliteRecordToList(this);
 
-
 			selecting.FlushESPstring();
 			selecting.SendEspRemove(this);
-			selecting.ScannedBarcodes(this);
 			
 			//selecting.FlushLists();
 
@@ -130,6 +127,10 @@ namespace Evidencia
 			txtSender.Text = string.Empty;
 			TxtOut.Text = string.Empty;
 			txtInr.Text = string.Empty;
+			lstBoxNespravne.Items.Clear();
+			lstBoxSpravne.Items.Clear();
+			lstBoxOcakavane.Items.Clear();
+			selecting.ScannedBarcodes(this);
 		}
 
 		private void Update(object sender, DoWorkEventArgs e)
@@ -155,22 +156,18 @@ namespace Evidencia
 
 							if (responseData != string.Empty)
 							{
-								//backGround.ReportProgress(0, responseData);
 								SAP=responseData.Substring(8, responseData.Length - 14);
 
 								this.Invoke(new Action(() =>
 								{									
 									txtTry.Text = SAP;
 									selecting.FillScannedList(this);
-									//selecting.ScannedBarcodes(this);
-									//selecting.ControlSapNumber(this);
-									//TODO plnenie struct List oskenovane zariadenia
+									selecting.ScannedBarcodesAfterScan(this);
+									selecting.ControlSapNumber(this);
 								}));
 								Debug.WriteLine("responseData=" + responseData.ToString() + "; SAP=" + SAP.ToString() );
-								//UpdateChanged(this, new ProgressChangedEventArgs(15, responseData.Substring(8, responseData.Length - 14)));								
 							}
 							responseData = string.Empty;	
-							//Debug.WriteLine("barcodeReaded=" + selecting.barcodeReaded.ToString() + "; barcodeReadedCount=" + selecting.barcodeReadedCount.ToString() + "; barcodeCount =" + selecting.barcodeCount.ToString());
 						}
 					}
 				}
@@ -238,7 +235,28 @@ namespace Evidencia
 
 		private void btnHodnotenie_Click(object sender, EventArgs e)
 		{
-			selecting.ScannedBarcodes(this);
+			//selecting.ExportListToCSVviaButton();
+			selecting.addRecordViaButton(this, "Scanned.txt");
+		}
+
+		private void listBoxNenaskenovane_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			//lblProductInformation.Text = lstBoxOcakavane.SelectedItem.ToString();
+			selecting.productInformationWaiting(this);
+		}
+
+		private void listBoxNaskenovane_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			//lblProductInformation.Text = lstBoxSpravne.SelectedItem.ToString();
+			selecting.productInformationCorrect(this);
+
+		}
+
+		private void listBoxNepotrebne_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			//lblProductInformation.Text = lstBoxNespravne.SelectedItem.ToString();
+			selecting.productInformationUnCorrect(this);
+
 		}
 	}
 }

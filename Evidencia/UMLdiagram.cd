@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Evidencia.Record">
+    <Position X="2.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CYAAJAUIAAIgACQUACBiAIgAECAIYQAACAYABCIAQgA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Evidencia.Evidencia">
+    <Position X="12" Y="0.5" Width="3.25" />
+    <Compartments>
+      <Compartment Name="Properties" Collapsed="true" />
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>MgRaEQATwW4JAApAiAGLJscLIwEKCBECJAyEQw0AqFA=</HashCode>
+      <FileName>Evidencia.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="selecting" />
+      <Field Name="tcp" />
+      <Field Name="localDb" />
+      <Field Name="onDb" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Evidencia.LocalDatabase">
+    <Position X="9" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAQAAgSACUAAQACBAAAAAAAEAAASAAA=</HashCode>
+      <FileName>LocalDatabase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Evidencia.OnlineDatabase">
+    <Position X="12.75" Y="6.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAIAAAAAABAEAAAAAAAAEAAAAIAAEAAAIQAA=</HashCode>
+      <FileName>OnlineDatabase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Evidencia.Selecting">
+    <Position X="16.25" Y="0.5" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>MCBED2EIJAQGZCoAGQJwhABBQhgYCECADAgCCDQABAA=</HashCode>
+      <FileName>Selecting.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Evidencia.TCP">
+    <Position X="9" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAQAAAAAAQAAAAAEEAAAAIQAYAJAAAAIAAAAAAEEAAA=</HashCode>
+      <FileName>TCP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataTableRecords">
+    <Position X="6.5" Y="1.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>CYAAJAUIAAIAgCQQACBiAIgAECAIYQAACAYAAAIAQgA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataTableUsers">
+    <Position X="4.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAQABAAAAAAAAAEAAAAAAwA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="User">
+    <Position X="1" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAEAAAAAAQABAAAAAAAAAEAAAAAAwA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DataTableNamespace">
+    <Position X="4.5" Y="1.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAMACAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Namespace">
+    <Position X="1" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAMACAAAAAACAEAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="Evidencia.Scanned">
+    <Position X="4.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAEAAAAIACEAAAAAAAQAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>DataDb.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

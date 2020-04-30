@@ -23,11 +23,11 @@ namespace Evidencia
 			{
 				LoadDataToListRecords(ev);
 				ev.TxtOut.Text = string.Empty;
-				//foreach (DataTableRecords du in data_source_records)
-				//{
-				//	ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + "\t" + du.inr + Environment.NewLine;
+				foreach (DataTableRecords du in data_source_records)
+				{
+					ev.TxtOut.Text += du.ID.ToString() + "\t" + du.meta_sap + "\t" + du.data_name + "\t" + du.place_room_sap + "\t" + du.place_locker + "\t" + du.place_shelve + "\t" + du.inr + Environment.NewLine;
 
-				//}
+				}
 
 			}
 			catch (Exception ex)
@@ -64,14 +64,9 @@ namespace Evidencia
 				MessageBox.Show("Server nie je zapnutý");
 			}
 			
-			//ev.localDatabase.ListRecordToSqlite(data_source_records);
-
-			
-			//dbz.ViewSqliteToDb(this);
 		}
+
 		//*************************************************************************************************
-
-
 		/// <summary>
 		/// Funkcia, ktorá obsahuje funckiu LoadDataUsers a následne tieto údaje vypíše
 		/// </summary>

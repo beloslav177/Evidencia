@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using CsvHelper;
 using Evidencia;
 using static Evidencia.Record;
 
@@ -20,6 +23,8 @@ namespace Evidencia
         private List<Record> SelectShelve = new List<Record>();
         private List<Record> SelectSAP = new List<Record>();
         private List<Record> SelectINR = new List<Record>();
+        private List<Record> SpravneUmiestnenie = new List<Record>();
+        private List<Record> NespravneUmiestnenie = new List<Record>();
 
         public string SAPControl;
         public string INRtxtBox;
@@ -49,11 +54,19 @@ namespace Evidencia
         /// <param name="ev"></param>
         public void InitializeSelecting(Evidencia ev)
         {
-            loadDataToComboBoxes(ev);
-            cmbBoxEnabled(ev);
-            ev.cmbRoom.SelectedIndex = 11;
-            ScannedBarcodes(ev);
-            //  ev.lstBoxOcakavane.Items.AddRange(SelectRoom.Select(x => x.inr).ToArray());
+            try
+            {
+                loadDataToComboBoxes(ev);
+                cmbBoxEnabled(ev);
+                ev.cmbRoom.SelectedIndex = 11;
+                ScannedBarcodes(ev);
+                //  ev.lstBoxOcakavane.Items.AddRange(SelectRoom.Select(x => x.inr).ToArray());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -131,17 +144,17 @@ namespace Evidencia
                         ev.cmbLocker.Enabled = false;
                         ev.cmbShelve.Enabled = false;
                         ev.listBox.DataSource = SelectRoom;
-                    }                   
+                    }
                 }
                 else
                 {
                     MakeESPstringRoom(ev);
                     SelectRoom = ev.localDb.zaznamyRecord;
-                    ev.btnESPstringSend.Enabled = true;                   
+                    ev.btnESPstringSend.Enabled = true;
                 }
                 ScannedBarcodes(ev);
                 ev.listBox.DataSource = SelectRoom;
-                ev.lblOcakavaneCounter.Text = SelectRoom.Count.ToString();
+                //ev.lblOcakavaneCounter.Text = SelectRoom.Count.ToString();
                 ev.txtInr.Text = SelectRoom.Count.ToString();
             }
             catch (Exception exc)
@@ -189,7 +202,7 @@ namespace Evidencia
                 }
                 ScannedBarcodes(ev);
                 ev.listBox.DataSource = SelectLocker;
-                ev.lblOcakavaneCounter.Text = SelectLocker.Count.ToString(); 
+                //ev.lblOcakavaneCounter.Text = SelectLocker.Count.ToString();
                 ev.txtInr.Text = SelectLocker.Count.ToString();
 
             }
@@ -232,7 +245,7 @@ namespace Evidencia
                 }
                 ScannedBarcodes(ev);
                 ev.listBox.DataSource = SelectShelve;
-                ev.lblOcakavaneCounter.Text = SelectShelve.Count.ToString();
+                //ev.lblOcakavaneCounter.Text = SelectShelve.Count.ToString();
                 ev.txtInr.Text = SelectShelve.Count.ToString();
 
             }
@@ -249,16 +262,24 @@ namespace Evidencia
         /// <param name="ev"></param>
         public void cmbBoxEnabled(Evidencia ev)
         {
-            if (ev.cmbRoom.SelectedIndex < 1)
+            try
             {
-                ev.cmbLocker.Enabled = false;
-                ev.cmbShelve.Enabled = false;
+                if (ev.cmbRoom.SelectedIndex < 1)
+                {
+                    ev.cmbLocker.Enabled = false;
+                    ev.cmbShelve.Enabled = false;
+                }
+                else
+                {
+                    ev.cmbLocker.Enabled = true;
+                    ev.cmbShelve.Enabled = true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ev.cmbLocker.Enabled = true;
-                ev.cmbShelve.Enabled = true;
+                MessageBox.Show(ex.Message);
             }
+
         }
 
         /// <summary>
@@ -266,9 +287,16 @@ namespace Evidencia
         /// </summary>
         /// <param name="ev"></param>
         public void SendEspString(Evidencia ev)
-        {          
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
-            ev.tcp.SendMsg(EspString);
+        {
+            try
+            {
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
+                ev.tcp.SendMsg(EspString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
 
@@ -278,13 +306,20 @@ namespace Evidencia
         /// <param name="ev"></param>
         public void SendEspRemove(Evidencia ev)
         {
-            RoomLockerShelve = "M-:-:-";
-            INRreadedString = "( -";
-            INRreadedCount = ") 0 [ 0 ]";
-            INRnoReadedCount = "< 0";
-            INRnoReadedString = "> -";
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
-            ev.tcp.SendMsg(EspString);
+            try
+            {
+                RoomLockerShelve = "M-:-:-";
+                INRreadedString = "( -";
+                INRreadedCount = ") 0 [ 0 ]";
+                INRnoReadedCount = "< 0";
+                INRnoReadedString = "> -";
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
+                ev.tcp.SendMsg(EspString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         /// <summary>
@@ -379,133 +414,161 @@ namespace Evidencia
         /// <param name="ev"></param>
         public void SAPlistIsInList(Evidencia ev)
         {
-            string INRremove;
-            INRremove = INRnoReadedString;
-            int INRindexOf = INRremove.IndexOf(INRControl);
-            int INRlength = INRControl.Length;
-            int INRStringLength = INRremove.Length;
-            INRremoveNoRead = INRremove.Remove(INRindexOf, INRlength + 1);
+            try
+            {
+                string INRremove;
+                INRremove = INRnoReadedString;
+                int INRindexOf = INRremove.IndexOf(INRControl);
+                int INRlength = INRControl.Length;
+                int INRStringLength = INRremove.Length;
+                INRremoveNoRead = INRremove.Remove(INRindexOf, INRlength + 1);
 
-            List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
+                List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
 
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
-            INRpocetNoRead--;
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            INRreadedString += INRControl;
-            INRpocetRead++;
-            barcodeReaded += ev.SAP;
-            barcodeReadedCount += ev.SAP.Count();
-            barcodeCount = barcodeReadedCount / 8;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
-            ev.txtSender.Text = RoomLockerShelve;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            Debug.WriteLine("EspString= " + EspString.ToString());
-            // ev.listINR.DataSource = INR;
-            ev.txtInr.Text = SAPControl;
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
+                INRpocetNoRead--;
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                INRreadedString += INRControl;
+                INRpocetRead++;
+                barcodeReaded += ev.SAP;
+                barcodeReadedCount += ev.SAP.Count();
+                barcodeCount = barcodeReadedCount / 8;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
+                ev.txtSender.Text = RoomLockerShelve;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                Debug.WriteLine("EspString= " + EspString.ToString());
+                // ev.listINR.DataSource = INR;
+                ev.txtInr.Text = SAPControl;
 
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
-            ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
-            ev.tcp.SendMsg(EspString);
-            Debug.WriteLine("SAPControl= " + SAPControl.ToString());
-            Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
+                ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
+                ev.tcp.SendMsg(EspString);
+                Debug.WriteLine("SAPControl= " + SAPControl.ToString());
+                Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void SAPlistIsntInList(Evidencia ev)
         {
-            string SAPlist;
-            SAPlist = SAPstring;
-            Debug.WriteLine("!SAPlistContains NOT ev.SAP ");
+            try
+            {
+                string SAPlist;
+                SAPlist = SAPstring;
+                Debug.WriteLine("!SAPlistContains NOT ev.SAP ");
 
-            List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
+                List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
 
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            barcodeReaded += ev.SAP;
-            barcodeReadedCount += ev.SAP.Count();
-            barcodeCount = barcodeReadedCount / 8;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
-            ev.txtSender.Text = RoomLockerShelve;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            // ev.listINR.DataSource = INR;
-            //ev.txtInr.Text = SAPControl;
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                barcodeReaded += ev.SAP;
+                barcodeReadedCount += ev.SAP.Count();
+                barcodeCount = barcodeReadedCount / 8;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
+                ev.txtSender.Text = RoomLockerShelve;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                // ev.listINR.DataSource = INR;
+                //ev.txtInr.Text = SAPControl;
 
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
-            ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
-            Debug.WriteLine("EspString= " + EspString.ToString());
-            ev.tcp.SendMsg(EspString);
-            Debug.WriteLine("SAPlist= " + SAPlist.ToString());
-            Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
+                ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
+                Debug.WriteLine("EspString= " + EspString.ToString());
+                ev.tcp.SendMsg(EspString);
+                Debug.WriteLine("SAPlist= " + SAPlist.ToString());
+                Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void SAPlistIsNotInList(Evidencia ev)
         {
-            string SAPlist;
-            SAPlist = SAPstring;
-            Debug.WriteLine("!SAPlistContains NOT ev.SAP ");
+            try
+            {
+                string SAPlist;
+                SAPlist = SAPstring;
+                Debug.WriteLine("!SAPlistContains NOT ev.SAP ");
 
-            List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
+                List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
 
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            barcodeReaded += ev.SAP;
-            barcodeReadedCount += ev.SAP.Count();
-            barcodeCount = barcodeReadedCount / 8;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
-            ev.txtSender.Text = RoomLockerShelve;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            // ev.listINR.DataSource = INR;
-            //ev.txtInr.Text = SAPControl;
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                barcodeReaded += ev.SAP;
+                barcodeReadedCount += ev.SAP.Count();
+                barcodeCount = barcodeReadedCount / 8;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
+                ev.txtSender.Text = RoomLockerShelve;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                // ev.listINR.DataSource = INR;
+                //ev.txtInr.Text = SAPControl;
 
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
-            ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
-            Debug.WriteLine("EspString= " + EspString.ToString());
-            ev.tcp.SendMsg(EspString);
-            Debug.WriteLine("SAPlist= " + SAPlist.ToString());
-            Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
+                ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRnoReadedString.ToString();
+                Debug.WriteLine("EspString= " + EspString.ToString());
+                ev.tcp.SendMsg(EspString);
+                Debug.WriteLine("SAPlist= " + SAPlist.ToString());
+                Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void SAPstringIsNotInList(Evidencia ev)
         {
-            Debug.WriteLine("!SAPLIST Contains NOT ev.SAP ");
-            string SAPlist;
-            string INRremove;
-            INRremove = INRnoReadedString;
-            SAPlist = SAPstring;
-            SelectSAP = ev.localDb.zaznamyRecord.Where(x => x.meta_sap == ev.SAP).ToList();
-            SelectINR = SelectShelve.Where(x => x.meta_sap != ev.SAP).ToList();
-            int INRselectINRcount = SelectINR.Count();
-            List<string> INRselector = SelectSAP.Select(x => x.inr).Distinct().ToList();
-            foreach (var model in INRselector)
+            try
             {
-                INRControl = model + "\\r";
+                Debug.WriteLine("!SAPLIST Contains NOT ev.SAP ");
+                string SAPlist;
+                string INRremove;
+                INRremove = INRnoReadedString;
+                SAPlist = SAPstring;
+                SelectSAP = ev.localDb.zaznamyRecord.Where(x => x.meta_sap == ev.SAP).ToList();
+                SelectINR = SelectShelve.Where(x => x.meta_sap != ev.SAP).ToList();
+                int INRselectINRcount = SelectINR.Count();
+                List<string> INRselector = SelectSAP.Select(x => x.inr).Distinct().ToList();
+                foreach (var model in INRselector)
+                {
+                    INRControl = model + "\\r";
+                }
+
+                Debug.WriteLine("SelectSAP=" + SelectSAP.ToString() + "; SAP=" + ev.SAP.ToString());
+                ev.listBox.DataSource = SelectINR;
+                List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
+
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                INRnoReadedString = "";
+                INRnoReadedString = ">";
+                foreach (var model in INR)
+                {
+                    INRnoReadedString += model + "\\r";
+                    INRtxtBox += model;
+                }
+                barcodeReaded += ev.SAP;
+                barcodeReadedCount += ev.SAP.Count();
+                barcodeCount = barcodeReadedCount / 8;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
+                ev.txtSender.Text = RoomLockerShelve;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                // ev.listINR.DataSource = INR;
+                EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
+                //ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRremoveNoRead.ToString();
+                Debug.WriteLine("EspString= " + EspString.ToString());
+                ev.tcp.SendMsg(EspString);
+                //Debug.WriteLine("SAPlist= " + SAPlist.ToString());
+                //Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
             }
-
-            Debug.WriteLine("SelectSAP=" + SelectSAP.ToString() + "; SAP=" + ev.SAP.ToString());
-            ev.listBox.DataSource = SelectINR;
-            List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
-
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text;
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            INRnoReadedString = "";
-            INRnoReadedString = ">";
-            foreach (var model in INR)
+            catch (Exception ex)
             {
-                INRnoReadedString += model + "\\r";
-                INRtxtBox += model;
+                MessageBox.Show(ex.Message);
             }
-            barcodeReaded += ev.SAP;
-            barcodeReadedCount += ev.SAP.Count();
-            barcodeCount = barcodeReadedCount / 8;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]";
-            ev.txtSender.Text = RoomLockerShelve;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            // ev.listINR.DataSource = INR;
-            EspString = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRremoveNoRead;
-            //ev.TxtOut.Text = RoomLockerShelve.ToString() + INRreadedString + INRreadedCount + INRnoReadedCount.ToString() + INRremoveNoRead.ToString();
-            Debug.WriteLine("EspString= " + EspString.ToString());
-            ev.tcp.SendMsg(EspString);
-            //Debug.WriteLine("SAPlist= " + SAPlist.ToString());
-            //Debug.WriteLine("INRremoveNoRead= " + INRremoveNoRead.ToString());
         }
 
 
@@ -517,155 +580,179 @@ namespace Evidencia
             return ockavane;
 
         }
+
         /// <summary>
         /// Funkcia pre vytvorenie reťazca znakov pri výbere miestnosti, skrine a poličky
         /// </summary>
         /// <param name="ev"></param>
         public void MakeESPstringShelve(Evidencia ev)
         {
-            List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
-            List<string> SAP = SelectShelve.Select(x => x.meta_sap).Distinct().ToList();
+            try
+            {
+                List<string> INR = SelectShelve.Select(x => x.inr).Distinct().ToList();
+                List<string> SAP = SelectShelve.Select(x => x.meta_sap).Distinct().ToList();
 
-            SAPstring = "";
-            INRnoReadedString = "";
-            //TODO: spraviť skladanie string pre INR, podmienka ak je väčší počet ako 200, poslať ! 
-            INRpocetNoRead = INR.Count(); //počet zariadení
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            INRreadedString = "";
-            INRreadedString = "(";
-            int INRpocetRead = 0;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
-            barcodeCount = 0;
+                SAPstring = "";
+                INRnoReadedString = "";
+                //TODO: spraviť skladanie string pre INR, podmienka ak je väčší počet ako 200, poslať ! 
+                INRpocetNoRead = INR.Count(); //počet zariadení
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                INRreadedString = "";
+                INRreadedString = "(";
+                int INRpocetRead = 0;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
+                barcodeCount = 0;
 
-            foreach (var model in INR)
-            {
-                INRtxtBox += model;
-                INRtmp = model;
-            }
-            foreach (var model in SAP)
-            {
-                SAPstring += model;
-            }
-            int INRtmpCount = SelectShelve.Count();
-            if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
-            {
-                INRnoReadedString = "! Prilis //r vela //r zariadeni";
-                INRreadedString = "( Zvolte \\r skrinu";
-            }
-            else
-            {
-                INRnoReadedString = ">";
                 foreach (var model in INR)
                 {
-                    INRnoReadedString += model + "\\r"; // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
                     INRtxtBox += model;
+                    INRtmp = model;
                 }
+                foreach (var model in SAP)
+                {
+                    SAPstring += model;
+                }
+                int INRtmpCount = SelectShelve.Count();
+                if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
+                {
+                    INRnoReadedString = "! Prilis //r vela //r zariadeni";
+                    INRreadedString = "( Zvolte \\r skrinu";
+                }
+                else
+                {
+                    INRnoReadedString = ">";
+                    foreach (var model in INR)
+                    {
+                        INRnoReadedString += model + "\\r"; // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
+                        INRtxtBox += model;
+                    }
+                }
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
+                ev.txtSender.Text = RoomLockerShelve.ToString();
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                // ev.listINR.DataSource = INR;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
+                //  ev.listINR.DataSource = INR;
+                ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
             }
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
-            ev.txtSender.Text = RoomLockerShelve.ToString();
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            // ev.listINR.DataSource = INR;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
-            //  ev.listINR.DataSource = INR;
-            ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         public void MakeESPstringLocker(Evidencia ev)
         {
-            List<string> INR = SelectLocker.Select(x => x.inr).Distinct().ToList();
-            List<string> SAP = SelectLocker.Select(x => x.meta_sap).Distinct().ToList();
+            try
+            {
+                List<string> INR = SelectLocker.Select(x => x.inr).Distinct().ToList();
+                List<string> SAP = SelectLocker.Select(x => x.meta_sap).Distinct().ToList();
 
-            SAPstring = "";
-            INRnoReadedString = "";
-            INRnoReadedString = ">";
-            INRpocetNoRead = INR.Count();
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            INRreadedString = "";
-            INRreadedString = "(";
-            int INRpocetRead = 0;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
-            barcodeCount = 0;
-
-            foreach (var model in INR)
-            {
-                INRtxtBox += model;
-                INRtmp = model;
-            }
-            foreach (var model in SAP)
-            {
-                SAPstring += model;
-            }
-            int INRtmpCount = SelectLocker.Count();
-            if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
-            {
-                INRnoReadedString = "! Prilis //r vela //r zariadeni";
-                INRreadedString = "( Zvolte \\r skrinu";
-            }
-            else
-            {
+                SAPstring = "";
+                INRnoReadedString = "";
                 INRnoReadedString = ">";
+                INRpocetNoRead = INR.Count();
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                INRreadedString = "";
+                INRreadedString = "(";
+                int INRpocetRead = 0;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
+                barcodeCount = 0;
+
                 foreach (var model in INR)
                 {
-                    INRnoReadedString += model + "\\r"; // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
                     INRtxtBox += model;
+                    INRtmp = model;
                 }
-            }
+                foreach (var model in SAP)
+                {
+                    SAPstring += model;
+                }
+                int INRtmpCount = SelectLocker.Count();
+                if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
+                {
+                    INRnoReadedString = "! Prilis //r vela //r zariadeni";
+                    INRreadedString = "( Zvolte \\r skrinu";
+                }
+                else
+                {
+                    INRnoReadedString = ">";
+                    foreach (var model in INR)
+                    {
+                        INRnoReadedString += model + "\\r"; // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
+                        INRtxtBox += model;
+                    }
+                }
 
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
-            ev.txtSender.Text = RoomLockerShelve.ToString();
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            // ev.listINR.DataSource = INR;
-            ev.txtReceiver.Text = INRpocetNoRead.ToString();
-            ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
-            ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
+                ev.txtSender.Text = RoomLockerShelve.ToString();
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                // ev.listINR.DataSource = INR;
+                ev.txtReceiver.Text = INRpocetNoRead.ToString();
+                ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
+                ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void MakeESPstringRoom(Evidencia ev)
         {
-            List<string> INR = SelectRoom.Select(x => x.inr).ToList();
-            List<string> SAP = SelectRoom.Select(x => x.meta_sap).ToList();
+            try
+            {
+                List<string> INR = SelectRoom.Select(x => x.inr).ToList();
+                List<string> SAP = SelectRoom.Select(x => x.meta_sap).ToList();
 
-            SAPstring = "";
-            INRnoReadedString = "";
-            INRpocetNoRead = INR.Count();
-            INRnoReadedCount = "<" + INRpocetNoRead.ToString();
-            INRreadedString = "(";
-            int INRpocetRead = 0;
-            INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
-            barcodeCount = 0;
+                SAPstring = "";
+                INRnoReadedString = "";
+                INRpocetNoRead = INR.Count();
+                INRnoReadedCount = "<" + INRpocetNoRead.ToString();
+                INRreadedString = "(";
+                int INRpocetRead = 0;
+                INRreadedCount = ")" + INRpocetRead + " [" + barcodeCount + "]"; // )0[0]
+                barcodeCount = 0;
 
-            foreach (var model in INR)
-            {
-                INRtxtBox += model;
-                INRtmp = model;
-            }
-            foreach (var model in SAP)
-            {
-                SAPstring += model;
-            }
-            int INRtmpCount = SelectRoom.Count();
-            if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
-            {
-                INRnoReadedString = "! Prilis \\r vela \\r zariadeni";
-                INRreadedString = "( zvolte \\r skrinu";
-            }
-            else
-            {
-                INRnoReadedString = ">";
-                foreach (var model in INR) // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
+                foreach (var model in INR)
                 {
-                    INRnoReadedString += model + "\\r";
                     INRtxtBox += model;
+                    INRtmp = model;
                 }
+                foreach (var model in SAP)
+                {
+                    SAPstring += model;
+                }
+                int INRtmpCount = SelectRoom.Count();
+                if (INRtmpCount > 150) // podmienka, pokiaľ je viac ako 150 zariadení, mení sa reťazec znakov a nepošle zariadenia vo formáte INR, potreba zúžiť výber
+                {
+                    INRnoReadedString = "! Prilis \\r vela \\r zariadeni";
+                    INRreadedString = "( ";
+                }
+                else
+                {
+                    INRnoReadedString = ">";
+                    foreach (var model in INR) // načítanie všetkých INR zariadení do premennej s ošetrením nového riadku pre displej 
+                    {
+                        INRnoReadedString += model + "\\r";
+                        INRtxtBox += model;
+                    }
+                }
+
+                RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
+                ev.txtSender.Text = RoomLockerShelve.ToString();
+                ev.txtReceiver.Text = INRtmpCount.ToString();
+                ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
+                //  ev.listINR.DataSource = INR;
+                ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
 
-            RoomLockerShelve = "Mmiest.  " + ev.cmbRoom.Text + ":skr.  " + ev.cmbLocker.Text + ":pol.  " + ev.cmbShelve.Text; // reťazec znakov pre miestnosť, skriňu a poličku
-            ev.txtSender.Text = RoomLockerShelve.ToString();
-            ev.txtReceiver.Text = INRtmpCount.ToString();
-            ev.TxtOut.Text = RoomLockerShelve + INRreadedString + INRreadedCount + INRnoReadedCount + INRnoReadedString;
-            //  ev.listINR.DataSource = INR;
-            ev.txtInr.Text = ev.TxtOut.Text.Count().ToString();
         }
 
         /// <summary>
@@ -673,12 +760,20 @@ namespace Evidencia
         /// </summary>
         public void FlushESPstring()
         {
-            RoomLockerShelve = "";
-            INRreadedString = "";
-            INRreadedCount = "";
-            INRnoReadedCount = "";
-            INRremoveNoRead = "";
-            barcodeCount = 0;
+            try
+            {
+                RoomLockerShelve = "";
+                INRreadedString = "";
+                INRreadedCount = "";
+                INRnoReadedCount = "";
+                INRremoveNoRead = "";
+                barcodeCount = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -687,171 +782,432 @@ namespace Evidencia
         /// <param name="ev"></param>
         public void ScannedBarcodes(Evidencia ev)
         {
-            ev.lstBoxNespravne.Items.Clear();
-            ev.lstBoxSpravne.Items.Clear();
-            ev.lstBoxOcakavane.Items.Clear();
-
-
-            List<Record> NaskenovaneZariadenia = new List<Record>();    //zoznam naskenovanych zariadeni        
-            List<Record> SpravneUmiestnenie = new List<Record>();
-            List<Record> NespravneUmiestnenie = new List<Record>();
-            List<Record> Ocakavane = new List<Record>(ev.localDb.zaznamyRecord);
-
-            //List<Scanned> ScannedDeviced = new List<Scanned>();    //zoznam naskenovanych zariadeni        
-            //List<Scanned> CorrectMapping = new List<Scanned>();
-            //List<Scanned> UncorrectMapping = new List<Scanned>();
-            //List<Scanned> WaitingDeviced = new List<Scanned>(ev.localDb.Items);
-
-
-            if (ev.cmbRoom.SelectedIndex >= 0)
+            try
             {
-                if (ev.cmbLocker.SelectedIndex >= 0)
+                ev.lstBoxNespravne.Items.Clear();
+                ev.lstBoxSpravne.Items.Clear();
+                ev.lstBoxOcakavane.Items.Clear();
+
+
+                List<Record> NaskenovaneZariadenia = new List<Record>();    //zoznam naskenovanych zariadeni        
+
+                List<Record> Ocakavane = new List<Record>(ev.localDb.zaznamyRecord);
+
+                if (ev.cmbRoom.SelectedIndex >= 0)
                 {
-                    if (ev.cmbShelve.SelectedIndex >= 0)
+                    if (ev.cmbLocker.SelectedIndex >= 0)
                     {
-                        //string roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
-                        //List<Scanned> OcakavanePolicka = (List<Scanned>)Ocakavane
-                        //    .FindAll(x => x.room == (string)roomSap
-                        //&& x.locker == ev.cmbLocker.SelectedItem.ToString()
-                        //&& x.shelve == Convert.ToInt32(ev.cmbShelve.SelectedItem));
-
-                        SelectShelve.FindAll(x => x.place_shelve == ev.cmbShelve.Text); //ev.cmbRoom.SelectedItem 
-
-                        foreach (var s in ScannedItems
-                            .FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()
-                        && x.locker == ev.cmbLocker.SelectedItem.ToString()
-                        && x.shelve == ev.cmbShelve.SelectedItem.ToString()))
+                        if (ev.cmbShelve.SelectedIndex >= 0)
                         {
-                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
-                            if (item.isShelveCorrect(s))
+                            SelectShelve.FindAll(x => x.place_shelve == ev.cmbShelve.Text); //ev.cmbRoom.SelectedItem                           
+
+                            foreach (var s in ScannedItems
+                                .FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()
+                            && x.locker == ev.cmbLocker.SelectedItem.ToString()
+                            && x.shelve == ev.cmbShelve.SelectedItem.ToString()))
                             {
-                                //naskenovane je medzi ocakavanymi
-                                SpravneUmiestnenie.Add(item);
-                                int indexF = SelectShelve.FindIndex(x => x.meta_sap == s.sap);
-                                //SelectShelve.RemoveAt(SelectShelve.FindIndex(x => x.meta_sap == s.sap));
-                                SelectShelve.RemoveAt(indexF);
+                                Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                                int indexOf = SelectShelve.FindIndex(x => x.meta_sap == s.sap);
+                                if (indexOf > 0) //item.isShelveCorrect(s)
+                                {
+                                    if (SpravneUmiestnenie.Contains(item))
+                                    {
+                                        //  MessageBox.Show("Už skenovane zariadenie");
+                                    }
+                                    else
+                                    {
+                                        //naskenovane je medzi ocakavanymi
+                                        SpravneUmiestnenie.Add(item);
+                                        indexOf = SelectShelve.FindIndex(x => x.meta_sap == s.sap);
+                                        //SelectShelve.RemoveAt(SelectShelve.FindIndex(x => x.meta_sap == s.sap));
+                                        SelectShelve.RemoveAt(indexOf);
+                                    }
+                                }
+                                else if (indexOf < 0)
+                                {
+                                    if (NespravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                }
                             }
-                            else
-                            {
-                                NespravneUmiestnenie.Add(item);
-                            }
+                            ev.lstBoxOcakavane.Items.AddRange(SelectShelve.Select(x => x.inr).ToArray());
+                            ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                               + "Očakávané zariadenia:  " + SelectShelve.Count.ToString() + Environment.NewLine
+                                 + "Správne umiestnenie:    " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                                 + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
                         }
-                        ev.lstBoxOcakavane.Items.AddRange(SelectShelve.Select(x => x.inr).ToArray());
-                        ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
-                        ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
-                        ev.txtTry.Text = "Skenované zariadenia: " + ScannedItems.Count.ToString() + Environment.NewLine
-                           + "Očakávané zariadenia: " + SelectShelve.Count.ToString() + Environment.NewLine
-                             + "Správne umiestnenie: " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
-                             + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+                        else
+                        {
+                            SelectLocker.FindAll(x => x.place_locker == ev.cmbLocker.Text); //ev.cmbRoom.SelectedItem   
+
+                            foreach (var s in ScannedItems
+                                .FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()
+                            && x.locker == ev.cmbLocker.SelectedItem.ToString()))
+                            {
+                                Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                                int indexOf = SelectLocker.FindIndex(x => x.meta_sap == s.sap);
+                                if (indexOf > 0)
+                                {
+                                    if (SpravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        SpravneUmiestnenie.Add(item);
+                                        SelectLocker.RemoveAt(indexOf);
+                                    }
+                                }
+                                else if (indexOf < 0)
+                                {
+                                    if (NespravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                }
+                            }
+                            ev.lstBoxOcakavane.Items.AddRange(SelectLocker.Select(x => x.inr).ToArray());
+                            ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                            + "Očakávané zariadenia:  " + SelectLocker.Count.ToString() + Environment.NewLine
+                              + "Správne umiestnenie:    " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                              + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+                        }
                     }
                     else
                     {
-                        //List<Scanned> OcakavaneSkrina = (List<Scanned>)Ocakavane
-                        //    .FindAll(x => x.room == (string)roomSap
-                        //&& x.locker == ev.cmbLocker.SelectedItem.ToString());
-                        SelectLocker.FindAll(x => x.place_locker == ev.cmbLocker.Text); //ev.cmbRoom.SelectedItem   
-
-                        foreach (var s in ScannedItems
-                            .FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()
-                        && x.locker == ev.cmbLocker.SelectedItem.ToString()))
+                        //nacitanie zoznamu, co vsetko ma byt v danej miestnosti
+                        if (ev.cmbRoom.Text != miestnostiAll)
                         {
-                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
-                            if (item.isLockerCorrect(s))
+                            string roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
+                            SelectRoom.FindAll(x => x.place_room_sap == (string)roomSap); //ev.cmbRoom.SelectedItem                              
+
+                            foreach (var s in ScannedItems.FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()))
                             {
-                                SpravneUmiestnenie.Add(item);
-                                SelectLocker.RemoveAt(SelectLocker.FindIndex(x => x.meta_sap == s.sap));
-                            }
-                            else
-                            {
-                                NespravneUmiestnenie.Add(item);
+                                Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                                int indexOf = SelectRoom.FindIndex(x => x.meta_sap == s.sap);
+                                if (item == null) return;
+
+                                if (indexOf > 0)
+                                {
+                                    if (SpravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        //naskenovane je medzi ocakavanymi
+                                        SpravneUmiestnenie.Add(item);
+                                        SelectRoom.RemoveAt(SelectRoom.FindIndex(x => x.meta_sap == s.sap));
+                                    }
+                                }
+                                else if (indexOf <= 0)
+                                {
+                                    if (NespravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                }
                             }
                         }
-                        ev.lstBoxOcakavane.Items.AddRange(SelectLocker.Select(x => x.inr).ToArray());
+                        else
+                        {
+                            SelectRoom = ev.localDb.zaznamyRecord;
+                            foreach (var s in ScannedItems.FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()))
+                            {
+                                Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                                if (item == null) return;
+                                int indexOf = SelectRoom.FindIndex(x => x.meta_sap == s.sap);
+                                if (indexOf > 0)
+                                {
+                                    if (SpravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        //naskenovane je medzi ocakavanymi
+                                        SpravneUmiestnenie.Add(item);
+                                        SelectRoom.RemoveAt(SelectRoom.FindIndex(x => x.meta_sap == s.sap));
+                                    }
+                                }
+                                else if (indexOf <= 0)
+                                {
+                                    if (NespravneUmiestnenie.Contains(item))
+                                    {
+                                    }
+                                    else
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                }
+                            }
+                        }
+
+                        ev.lstBoxOcakavane.Items.AddRange(SelectRoom.Select(x => x.inr).ToArray());
                         ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
                         ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
-                        ev.txtTry.Text = "Skenované zariadenia: " + ScannedItems.Count.ToString() + Environment.NewLine 
-                        + "Očakávané zariadenia: " + SelectLocker.Count.ToString() + Environment.NewLine
-                          + "Správne umiestnenie: " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
-                          + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+                        ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                              + "Očakávané zariadenia:  " + SelectRoom.Count.ToString() + Environment.NewLine
+                                + "Správne umiestnenie:    " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                                + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+
                     }
                 }
-                else
+                // ev.listINR.DataSource = ev.localDb.Items;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Funkcia hlavného kontrolného módu v aplikácií, podmienky podľa výberu umiestnenie podľa miesntosti, skrine alebo poličky, následne vypísanie porovnávaných údajov podľa správneho alebo nesprávneho umiestnenia.
+        /// </summary>
+        /// <param name="ev"></param>
+        public void ScannedBarcodesAfterScan(Evidencia ev)
+        {
+            try
+            {
+                ev.lstBoxNespravne.Items.Clear();
+                ev.lstBoxSpravne.Items.Clear();
+                ev.lstBoxOcakavane.Items.Clear();
+
+                List<Record> NaskenovaneZariadenia = new List<Record>();    //zoznam naskenovanych zariadeni        
+                List<Record> Ocakavane = new List<Record>(ev.localDb.zaznamyRecord);
+
+                if (ev.cmbRoom.SelectedIndex >= 0)
                 {
-                    //nacitanie zoznamu, co vsetko ma byt v danej miestnosti
-
-                    string roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
-                    //SelectRoom.FindAll(x => x.place_room_sap == (string)roomSap); //ev.cmbRoom.SelectedItem   
-
-                    SelectRoom = ev.localDb.zaznamyRecord.Where(x => (x.place_room_sap == roomSap)).ToList();
-
-                    foreach (var s in ScannedItems.FindAll(x => x.room == ev.cmbRoom.SelectedItem.ToString()))
+                    if (ev.cmbLocker.SelectedIndex >= 0)
                     {
-                        Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
-                        if (item == null) return;
+                        if (ev.cmbShelve.SelectedIndex >= 0)
+                        {
+                            SelectShelve.FindAll(x => x.place_shelve == ev.cmbShelve.Text);                                                                                       
 
-                        if (item.isRoomCorrect(s))
-                        {
-                            //naskenovane je medzi ocakavanymi
-                            SpravneUmiestnenie.Add(item);
-                            SelectRoom.RemoveAt(SelectRoom.FindIndex(x => x.meta_sap == s.sap));
+                            Scanned s = ScannedItems[ScannedItems.Count - 1];
+                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                            int indexOf = SelectShelve.FindIndex(x => x.meta_sap == s.sap);
+                            if (indexOf > 0) //item.isShelveCorrect(s)
+                            {
+                                if (SpravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {                                    
+                                    SpravneUmiestnenie.Add(item);
+                                    SelectShelve.RemoveAt(indexOf);
+                                    SoundCorrect();
+                                }
+                            }
+                            else if (indexOf <= 0)
+                            {
+                                if (NespravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    if (item != null)
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+
+                                    }
+                                    else NespravneUmiestnenie.Add(new Record() { inr = " * " + s.sap + " * " });
+                                    Uncorrect();
+                                }
+                            }
+                            ev.lstBoxOcakavane.Items.AddRange(SelectShelve.Select(x => x.inr).ToArray());
+                            ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
+
+                            ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                               + "Očakávané zariadenia:  " + SelectShelve.Count.ToString() + Environment.NewLine
+                                 + "Správne umiestnenie:    " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                                 + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
                         }
                         else
                         {
-                            NespravneUmiestnenie.Add(item);
+                            SelectLocker.FindAll(x => x.place_locker == ev.cmbLocker.Text);   
+
+                            Scanned s = ScannedItems[ScannedItems.Count - 1];
+                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                            int indexOf = SelectLocker.FindIndex(x => x.meta_sap == s.sap);
+                            if (indexOf > 0)
+                            {
+                                if (SpravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    SpravneUmiestnenie.Add(item);
+                                    SelectLocker.RemoveAt(indexOf);
+                                    SoundCorrect();
+                                }
+                            }
+                            else if (indexOf <= 0)
+                            {
+                                if (NespravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    if (item != null)
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                    else NespravneUmiestnenie.Add(new Record() { inr = " * " + s.sap + " * " });
+                                    Uncorrect();
+                                }
+
+                            }
+
+                            ev.lstBoxOcakavane.Items.AddRange(SelectLocker.Select(x => x.inr).ToArray());
+                            ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
+                            ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                            + "Očakávané zariadenia:  " + SelectLocker.Count.ToString() + Environment.NewLine
+                              + "Správne umiestnenie:    " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                              + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
                         }
-                        /*
-                            SelectRoom.Exists(x => (x.meta_sap == s.sap)&&(x.place_room_sap == s.room)))
-                        {
-                            //naskenovane je medzi ocakavanymi
-                            SpravneUmiestnenie.Add(SelectRoom.Find(x => x.sap == s.sap));
-                            SelectRoom.RemoveAt(SelectRoom.FindIndex(x => x.sap == s.sap));
-                        }
-                        else
-                        {
-                            NespravneUmiestnenie.Add(ev.localDb.Items.Find(x => x.sap == s.sap));
-                        }
-                        */
                     }
-                    ev.lstBoxOcakavane.Items.AddRange(SelectRoom.Select(x => x.inr).ToArray());
-                    ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
-                    ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
-                    ev.txtTry.Text = "Skenované zariadenia: " + ScannedItems.Count.ToString() + Environment.NewLine
-                          + "Očakávané zariadenia: " + SelectRoom.Count.ToString() + Environment.NewLine
-                            + "Správne umiestnenie: " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
-                            + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+                    else
+                    {
+                        if (ev.cmbRoom.Text != miestnostiAll)
+                        {
+                            string roomSap = ev.localDb.zaznamyNamespace.Find(x => x.New == ev.cmbRoom.Text).original_room;
+                            SelectRoom.FindAll(x => x.place_room_sap == (string)roomSap); //ev.cmbRoom.SelectedItem   
 
+                            Scanned s = ScannedItems[ScannedItems.Count - 1];
+                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                            int indexOf = SelectRoom.FindIndex(x => x.meta_sap == s.sap);
+                            if (item == null) return;
+
+                            if (indexOf > 0)
+                            {
+                                if (SpravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    SpravneUmiestnenie.Add(item);
+                                    SelectRoom.RemoveAt(indexOf);
+                                    SoundCorrect();
+                                }
+                            }
+                            else if (indexOf <= 0)
+                            {
+                                if (NespravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    if (item != null)
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                    else NespravneUmiestnenie.Add(new Record() { inr = " * " + s.sap + " * " });
+                                    Uncorrect();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            SelectRoom = ev.localDb.zaznamyRecord;
+                            Scanned s = ScannedItems[ScannedItems.Count - 1];
+                            Record item = ev.localDb.zaznamyRecord.Find(x => x.meta_sap == s.sap);
+                            int indexOf = SelectRoom.FindIndex(x => x.meta_sap == s.sap);
+                            if (item == null) return;
+
+                            if (indexOf > 0)
+                            {
+                                if (SpravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    SpravneUmiestnenie.Add(item);
+                                    SelectRoom.RemoveAt(indexOf);
+                                    SoundCorrect();
+                                }
+                            }
+                            else if (indexOf < 0)
+                            {
+                                if (NespravneUmiestnenie.Contains(item))
+                                {
+                                }
+                                else
+                                {
+                                    if (item != null)
+                                    {
+                                        NespravneUmiestnenie.Add(item);
+                                    }
+                                    else NespravneUmiestnenie.Add(new Record() { inr = " * " + s.sap + " * " });
+                                    Uncorrect();
+                                }
+                            }
+                        }
+
+                        ev.lstBoxOcakavane.Items.AddRange(SelectRoom.Select(x => x.inr).ToArray());
+                        ev.lstBoxSpravne.Items.AddRange(SpravneUmiestnenie.Select(x => x.inr).ToArray());
+                        ev.lstBoxNespravne.Items.AddRange(NespravneUmiestnenie.Select(x => x.inr).ToArray());
+                        ev.txtTry.Text = "Skenované zariadenia:  " + ScannedItems.Count.ToString() + Environment.NewLine
+                              + "Očakávané zariadenia:  " + SelectRoom.Count.ToString() + Environment.NewLine
+                                + "Správne umiestnenie:     " + SpravneUmiestnenie.Count.ToString() + Environment.NewLine
+                                + "Nesprávna umiestnenie: " + NespravneUmiestnenie.Count.ToString();
+
+                    }
                 }
             }
-            // ev.listINR.DataSource = ev.localDb.Items;
-
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         public void FillScannedList(Evidencia ev)
         {
-            if (ev.cmbLocker.SelectedIndex > 0)
+            try
             {
-                if (ev.cmbShelve.SelectedIndex > 0)
+                if (ev.cmbLocker.SelectedIndex > 0)
                 {
-                    if (ev.SAP.Length > 0)
+                    if (ev.cmbShelve.SelectedIndex > 0)
                     {
-                        //ScannedItems.Add(ev.localDb.Items.Find(x => x.sap == ev.SAP));
-                        ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text, locker = ev.cmbLocker.Text, shelve = (ev.cmbShelve.Text) });
+                        if (ev.SAP.Length > 0)
+                        {
+                            ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text, locker = ev.cmbLocker.Text, shelve = (ev.cmbShelve.Text) });
 
-                        //ScannedItems.AddRange(ev.localDb.Items.FindAll(x => ev.localDb.Items.Select(y => y.sap).Contains(x.sap)));
-
-                        Debug.WriteLine("; SAP=" + ev.SAP.ToString());
+                            Debug.WriteLine("; SAP=" + ev.SAP.ToString());
+                        }
+                        ev.listINR.DataSource = ScannedItems;
+                        ev.txtTry.Text = ScannedItems.Count.ToString();
                     }
-                    ev.listINR.DataSource = ScannedItems;
-                    ev.txtTry.Text = ScannedItems.Count.ToString();
+                    else
+                    {
+                        if (ev.SAP.Length > 0)
+                        {
+                            ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text, locker = ev.cmbLocker.Text });
+
+                            Debug.WriteLine("; SAP=" + ev.SAP.ToString());
+                        }
+                        ev.listINR.DataSource = ScannedItems;
+                        ev.txtTry.Text = ScannedItems.Count.ToString();
+                    }
                 }
                 else
                 {
                     if (ev.SAP.Length > 0)
                     {
-                        //ScannedItems.Add(ev.localDb.Items.Find(x => x.sap == ev.SAP));
-                        ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text, locker = ev.cmbLocker.Text });
-
-                        //ScannedItems.AddRange(ev.localDb.Items.FindAll(x => ev.localDb.Items.Select(y => y.sap).Contains(x.sap)));
+                        ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text });
 
                         Debug.WriteLine("; SAP=" + ev.SAP.ToString());
                     }
@@ -859,21 +1215,10 @@ namespace Evidencia
                     ev.txtTry.Text = ScannedItems.Count.ToString();
                 }
             }
-            else
+            catch (Exception ex)
             {
-                if (ev.SAP.Length > 0)
-                {
-                    //ScannedItems.Add(ev.localDb.Items.Find(x => x.sap == ev.SAP));
-                    ScannedItems.Add(new Scanned() { sap = ev.SAP, room = ev.cmbRoom.Text });
-
-                    //ScannedItems.AddRange(ev.localDb.Items.FindAll(x => ev.localDb.Items.Select(y => y.sap).Contains(x.sap)));
-
-                    Debug.WriteLine("; SAP=" + ev.SAP.ToString());
-                }
-                ev.listINR.DataSource = ScannedItems;
-                ev.txtTry.Text = ScannedItems.Count.ToString();
+                throw new ApplicationException("Nepodarilo sa pridať zariadenie na evidenciu pretože: ", ex);
             }
-
 
         }
 
@@ -905,9 +1250,154 @@ namespace Evidencia
 
         public void FlushLists()
         {
-            SelectRoom.Clear();
             SelectLocker.Clear();
             SelectShelve.Clear();
+            SpravneUmiestnenie.Clear();
+            NespravneUmiestnenie.Clear();
+        }
+
+        public void addScannedItemToTXT(List<Scanned> records, string filepath, Evidencia ev)
+        {
+            try
+            {              
+                using (StreamWriter file = new StreamWriter(@filepath, true))
+                {
+                    foreach (var item in ScannedItems)
+                    {
+                        file.WriteLine(item.sap + ", " + item.room + ", " + item.locker + ", " + item.shelve);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void addRecordViaButton(Evidencia ev, string filepath)
+        {
+            using (var fs = new FileStream(filepath, FileMode.Truncate))
+            addScannedItemToTXT(ScannedItems, "Scanned.csv", ev);
+            addScannedItemToTXT(ScannedItems, "Scanned.txt", ev);
+        }
+
+        public void addTXTtoScannedItem(Evidencia ev, int positionOfSearchTerm)
+        {
+            //using (OpenFileDialog ofd = new OpenFileDialog() { Filter = Application.StartupPath + "Scanned.txt", ValidateNames = true, Multiselect = false })
+            //{
+            //    if (ofd.ShowDialog() == DialogResult.OK)
+            //    {
+            //        string[] lines = File.ReadAllLines(ofd.FileName);
+            //        foreach (var item in collection)
+            //        {
+
+            //        }
+            //    }
+            //}
+            //string[] csv = File.ReadAllLines(filepath);
+            //foreach (var csvrow in csv)
+            //{
+            //    var fiealds = csvrow.Split(',');
+            //    var ()
+            //    { 
+
+            //    }
+            //}
+            //positionOfSearchTerm--;
+            //string[] recordNotFound = { "Súbor sa nenašiel" };
+            //try
+            //{
+            //    string[] lines = File.ReadAllLines(@filepath);
+
+            //    for (int i = 0; i < lines.Length; i++)
+            //    {
+            //        string[] fields = lines[i].Split(',');
+            //        if (recordMatches(searchTerm, fields, positionOfSearchTerm))
+            //        {
+            //            MessageBox.Show("Posledná kontrola načítaná, môžete pokračovať.");
+            //            return fields;
+            //        }
+
+            //        MessageBox.Show("Súbor sa nenašiel");
+            //    }
+
+            //}
+            //catch (Exception)
+            //{
+            //    MessageBox.Show("Súbor sa nenašiel");
+            //}
+            //var txtToList = File.ReadLines(Application.StartupPath + @"\Scanned.txt").Select(x => new Scanned();
+           
+
+            //var items = ProcessCSV("Scanned.csv");
+            //foreach (var item in items)
+            //{
+
+            //}
+
+            //List<Scanned> ProcessCSV(string filepath)
+            //{
+            //    return File.ReadAllLines(filepath)
+            //        .Where(x => x.Length > 0)
+            //        .Select(Scanned.ParseRow);
+            //}
+
+        }
+
+        public void productInformationWaiting(Evidencia ev)
+        {
+            try
+            {
+                if (ev.cmbLocker.SelectedIndex > 0)
+                {
+                    if (ev.cmbShelve.SelectedIndex > 0)
+                    {
+                        ev.lblProductInformation.Text = SelectShelve.ToString();
+                    }
+                    else
+                    {
+                        ev.lblProductInformation.Text = SelectLocker.ToString();
+
+                    }
+                }
+                else
+                {
+                    ev.lblProductInformation.Text = SelectRoom.ToString();
+
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        public void productInformationCorrect(Evidencia ev)
+        {
+            ev.lblProductInformation.Text = SpravneUmiestnenie.ToString();
+        }
+
+        public void productInformationUnCorrect(Evidencia ev)
+        {
+            ev.lblProductInformation.Text = NespravneUmiestnenie.ToString();
+        }
+
+        public void SoundCorrect()
+        {
+            SoundPlayer music = new SoundPlayer
+            {
+                SoundLocation = Application.StartupPath + @"\Correct.wav"
+            };
+            music.Play();
+        }
+
+        public void Uncorrect()
+        {
+            SoundPlayer music = new SoundPlayer
+            {
+                SoundLocation = Application.StartupPath + @"\Uncorrect.wav"
+            };
+            music.Play();
         }
     }
 }

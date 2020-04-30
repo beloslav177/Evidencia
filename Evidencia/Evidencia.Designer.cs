@@ -59,8 +59,8 @@
             this.lblNaskenovaneN = new System.Windows.Forms.Label();
             this.lstBox = new System.Windows.Forms.ListBox();
             this.btnHodnotenie = new System.Windows.Forms.Button();
-            this.lblCount = new System.Windows.Forms.Label();
-            this.lblOcakavaneCount = new System.Windows.Forms.Label();
+            this.lblProduct = new System.Windows.Forms.Label();
+            this.lblProductInfo = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // txtOutput
@@ -137,7 +137,7 @@
             // 
             // btnClearData
             // 
-            this.btnClearData.Location = new System.Drawing.Point(265, 63);
+            this.btnClearData.Location = new System.Drawing.Point(138, 63);
             this.btnClearData.Name = "btnClearData";
             this.btnClearData.Size = new System.Drawing.Size(121, 23);
             this.btnClearData.TabIndex = 34;
@@ -147,10 +147,10 @@
             // 
             // txtTrying
             // 
-            this.txtTrying.Location = new System.Drawing.Point(695, 8);
+            this.txtTrying.Location = new System.Drawing.Point(11, 314);
             this.txtTrying.Multiline = true;
             this.txtTrying.Name = "txtTrying";
-            this.txtTrying.Size = new System.Drawing.Size(390, 62);
+            this.txtTrying.Size = new System.Drawing.Size(375, 60);
             this.txtTrying.TabIndex = 35;
             // 
             // txtIpAddress
@@ -160,7 +160,7 @@
             this.txtIpAddress.Name = "txtIpAddress";
             this.txtIpAddress.Size = new System.Drawing.Size(109, 22);
             this.txtIpAddress.TabIndex = 36;
-            this.txtIpAddress.Text = "192.168.0.105";
+            this.txtIpAddress.Text = "192.168.0.104";
             this.txtIpAddress.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // lblIPaddress
@@ -194,21 +194,21 @@
             // 
             // btnScan
             // 
-            this.btnScan.Location = new System.Drawing.Point(138, 37);
+            this.btnScan.Location = new System.Drawing.Point(265, 37);
             this.btnScan.Name = "btnScan";
             this.btnScan.Size = new System.Drawing.Size(121, 23);
             this.btnScan.TabIndex = 40;
-            this.btnScan.Text = "Zapnutie skenera";
+            this.btnScan.Text = "Uložiť kontrolu";
             this.btnScan.UseVisualStyleBackColor = true;
             this.btnScan.Click += new System.EventHandler(this.btnScan_Click);
             // 
             // btnStopScan
             // 
-            this.btnStopScan.Location = new System.Drawing.Point(137, 63);
+            this.btnStopScan.Location = new System.Drawing.Point(263, 63);
             this.btnStopScan.Name = "btnStopScan";
             this.btnStopScan.Size = new System.Drawing.Size(122, 23);
             this.btnStopScan.TabIndex = 41;
-            this.btnStopScan.Text = "Vypnutie skenera";
+            this.btnStopScan.Text = "Export kontroly";
             this.btnStopScan.UseVisualStyleBackColor = true;
             this.btnStopScan.Click += new System.EventHandler(this.btnStopScan_Click);
             // 
@@ -239,14 +239,14 @@
             // lstINR
             // 
             this.lstINR.FormattingEnabled = true;
-            this.lstINR.Location = new System.Drawing.Point(11, 364);
+            this.lstINR.Location = new System.Drawing.Point(235, 443);
             this.lstINR.Name = "lstINR";
             this.lstINR.Size = new System.Drawing.Size(677, 56);
             this.lstINR.TabIndex = 45;
             // 
             // btnEspSend
             // 
-            this.btnEspSend.Location = new System.Drawing.Point(265, 37);
+            this.btnEspSend.Location = new System.Drawing.Point(138, 37);
             this.btnEspSend.Name = "btnEspSend";
             this.btnEspSend.Size = new System.Drawing.Size(121, 23);
             this.btnEspSend.TabIndex = 46;
@@ -256,7 +256,7 @@
             // 
             // txtINR
             // 
-            this.txtINR.Location = new System.Drawing.Point(12, 426);
+            this.txtINR.Location = new System.Drawing.Point(11, 426);
             this.txtINR.Multiline = true;
             this.txtINR.Name = "txtINR";
             this.txtINR.Size = new System.Drawing.Size(217, 73);
@@ -277,6 +277,7 @@
             this.listBoxNenaskenovane.Name = "listBoxNenaskenovane";
             this.listBoxNenaskenovane.Size = new System.Drawing.Size(120, 160);
             this.listBoxNenaskenovane.TabIndex = 49;
+            this.listBoxNenaskenovane.SelectedIndexChanged += new System.EventHandler(this.listBoxNenaskenovane_SelectedIndexChanged);
             // 
             // listBoxNaskenovane
             // 
@@ -285,6 +286,7 @@
             this.listBoxNaskenovane.Name = "listBoxNaskenovane";
             this.listBoxNaskenovane.Size = new System.Drawing.Size(120, 160);
             this.listBoxNaskenovane.TabIndex = 50;
+            this.listBoxNaskenovane.SelectedIndexChanged += new System.EventHandler(this.listBoxNaskenovane_SelectedIndexChanged);
             // 
             // listBoxNepotrebne
             // 
@@ -293,6 +295,7 @@
             this.listBoxNepotrebne.Name = "listBoxNepotrebne";
             this.listBoxNepotrebne.Size = new System.Drawing.Size(123, 160);
             this.listBoxNepotrebne.TabIndex = 51;
+            this.listBoxNepotrebne.SelectedIndexChanged += new System.EventHandler(this.listBoxNepotrebne_SelectedIndexChanged);
             // 
             // lblNenaskenovane
             // 
@@ -331,30 +334,30 @@
             // 
             // btnHodnotenie
             // 
-            this.btnHodnotenie.Location = new System.Drawing.Point(398, 151);
+            this.btnHodnotenie.Location = new System.Drawing.Point(392, 8);
             this.btnHodnotenie.Name = "btnHodnotenie";
             this.btnHodnotenie.Size = new System.Drawing.Size(71, 23);
             this.btnHodnotenie.TabIndex = 55;
-            this.btnHodnotenie.Text = "Overiť";
+            this.btnHodnotenie.Text = "Uložiť";
             this.btnHodnotenie.UseVisualStyleBackColor = true;
             this.btnHodnotenie.Click += new System.EventHandler(this.btnHodnotenie_Click);
             // 
-            // lblCount
+            // lblProduct
             // 
-            this.lblCount.AutoSize = true;
-            this.lblCount.Location = new System.Drawing.Point(12, 314);
-            this.lblCount.Name = "lblCount";
-            this.lblCount.Size = new System.Drawing.Size(80, 13);
-            this.lblCount.TabIndex = 56;
-            this.lblCount.Text = "Počet položiek:";
+            this.lblProduct.AutoSize = true;
+            this.lblProduct.Location = new System.Drawing.Point(12, 402);
+            this.lblProduct.Name = "lblProduct";
+            this.lblProduct.Size = new System.Drawing.Size(60, 13);
+            this.lblProduct.TabIndex = 58;
+            this.lblProduct.Text = "Zariadenie:";
             // 
-            // lblOcakavaneCount
+            // lblProductInfo
             // 
-            this.lblOcakavaneCount.AutoSize = true;
-            this.lblOcakavaneCount.Location = new System.Drawing.Point(98, 314);
-            this.lblOcakavaneCount.Name = "lblOcakavaneCount";
-            this.lblOcakavaneCount.Size = new System.Drawing.Size(0, 13);
-            this.lblOcakavaneCount.TabIndex = 57;
+            this.lblProductInfo.AutoSize = true;
+            this.lblProductInfo.Location = new System.Drawing.Point(78, 402);
+            this.lblProductInfo.Name = "lblProductInfo";
+            this.lblProductInfo.Size = new System.Drawing.Size(0, 13);
+            this.lblProductInfo.TabIndex = 59;
             // 
             // Evidencia
             // 
@@ -362,8 +365,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.ClientSize = new System.Drawing.Size(1086, 511);
-            this.Controls.Add(this.lblOcakavaneCount);
-            this.Controls.Add(this.lblCount);
+            this.Controls.Add(this.lblProductInfo);
+            this.Controls.Add(this.lblProduct);
             this.Controls.Add(this.btnHodnotenie);
             this.Controls.Add(this.lblNaskenovaneN);
             this.Controls.Add(this.lblNaskenovanéY);
@@ -434,8 +437,8 @@
         private System.Windows.Forms.Label lblNaskenovaneN;
         private System.Windows.Forms.ListBox lstBox;
         private System.Windows.Forms.Button btnHodnotenie;
-        private System.Windows.Forms.Label lblCount;
-        private System.Windows.Forms.Label lblOcakavaneCount;
+        private System.Windows.Forms.Label lblProduct;
+        private System.Windows.Forms.Label lblProductInfo;
     }
 }
 

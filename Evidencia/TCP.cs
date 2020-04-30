@@ -14,9 +14,9 @@ namespace Evidencia
 		public NetworkStream netStream;
 		public TcpClient tcpClient;
 		private int numBytesRead;
-		private char StopChar = 'C';
-		private char ContinueScanChar = 'E';
-		private char RepeatDisableChar = 'G';
+		public char StopChar = 'C';
+		public char ContinueScanChar = 'E';
+		public char RepeatDisableChar = 'F';
 		public TCP()
 		{ }
 		/// <summary>
